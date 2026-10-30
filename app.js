@@ -36,23 +36,6 @@ function ytId(lesson) {
   const id = m[lessonKey(lesson)];
   return (typeof id === "string" && /^[A-Za-z0-9_-]{6,}$/.test(id)) ? id : null;
 }
-/* زر الاشتراك الرسمي داخل الصفحة (طلب الأستاذ 2026-10-30): التلميذ يشترك من
-   صفحة الدرس نفسها دون أن يُنقل إلى قناة يوتيوب. الوحدة المنفصلة yt-subscribe.js
-   تُحقن كسولًا هنا (كما تُحقن طبقة المزامنة عند النقر فقط) حتى يبقى app.js بلا
-   أي مرجع Google. الزر الرسمي يعمل على موقع https الحي فقط؛ في غيره (نسخة
-   محلية/اختبارات) يبقى رابط الاشتراك الاحتياطي ظاهرًا ويعمل كالمعتاد. */
-function initYtSubscribe() {
-  if (typeof document === "undefined" || !document.querySelector(".yt-sub-slot")) return;
-  if (typeof location === "undefined" || location.protocol !== "https:") return;
-  if (window.AcademyYtSubscribe) { window.AcademyYtSubscribe.renderAll(); return; }
-  if (document.querySelector("script[data-yt-subscribe]")) return;
-  const s = document.createElement("script");
-  s.src = "yt-subscribe.js";
-  s.async = true;
-  s.setAttribute("data-yt-subscribe", "1");
-  s.onload = () => { if (window.AcademyYtSubscribe) window.AcademyYtSubscribe.renderAll(); };
-  document.head.appendChild(s);
-}
 function localVideoHTML(l) {
   return '<video class="lesson-video" controls preload="metadata" src="' + videoPath(l) + '">' +
     '<track kind="captions" src="' + captionPath(l) + '" srclang="ar" label="العربية" default></video>';
@@ -1209,12 +1192,9 @@ function renderLesson(id) {
     body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' + localVideoHTML(l) +
       '<p class="muted small" id="video-note">ملف الفيديو المحلي: <span dir="ltr">' + videoPath(l) + '</span>' + (l.stub ? ' — سيُضاف عند إنتاجه.' : ' — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.') + '</p></section>';
   }
-  /* شريط القناة بجانب الفيديو (طلب الأستاذ 2026-10-30، وحُسّن بملاحظاته في
-     اليوم نفسه): هوية القناة بصورتها واسمها، زر اشتراك رسمي يعمل داخل الصفحة
-     دون انتقال إلى يوتيوب (خانة .yt-sub-slot تملؤها وحدة yt-subscribe.js،
-     والرابط الاحتياطي يختفي متى ظهر الزر الرسمي)، وزر «زيارة القناة» واضح
-     دائمًا بألوان صريحة — لا يعتمد على التحويم ليظهر. */
-  body += '<div class="yt-channel-bar"><span class="yt-channel-id"><img class="yt-channel-avatar" src="assets/channel-avatar.png" alt="شعار قناة Ai &amp; Robotics Club" width="46" height="46"><span class="yt-channel-text"><strong>Ai &amp; Robotics Club</strong><small>قناتنا على يوتيوب — دروس الأردوينو والروبوتيك خطوة بخطوة، اشترك ليصلك كل درس جديد</small></span></span><span class="yt-channel-actions"><span class="yt-sub-slot" data-channelid="UC4lRBYW3L2sZ9m-6_pXdcuw"></span><a class="btn btn-subscribe yt-sub-fallback" href="https://www.youtube.com/channel/UC4lRBYW3L2sZ9m-6_pXdcuw?sub_confirmation=1" target="_blank" rel="noopener">🔔 اشترك في القناة</a><a class="btn btn-visit" href="https://www.youtube.com/@AiRoboticsClub-o3x" target="_blank" rel="noopener">زيارة القناة</a></span></div>';
+  /* لا شريط قناة تحت الفيديو: دعوة الاشتراك تعيش داخل فيديوهات يوتيوب نفسها
+     عبر شاشات النهاية (قرار الأستاذ 2026-10-30 بعد تجربة زر الاشتراك الرسمي:
+     الزر كان يفتح صفحة يوتيوب عند الضغط، والشريط كلّه زائد بلا فائدة). */
 
   if (l.stub) {
     body += '<section class="card soon-card"><h2>🚧 هذا الدرس قيد الإعداد</h2><p>العنوان والنوع جاهزان في الخريطة المعتمدة، وسيُضاف الشرح والكود والفيديو والاختبار تباعًا. تابع الدروس الجاهزة الآن، وعد إلى هنا قريبًا.</p></section>';
@@ -1297,9 +1277,6 @@ function renderLesson(id) {
     (next ? '<a class="btn btn-ghost" href="#/lesson/' + next.id + '">الدرس التالي ←</a>' : '<span></span>') + '</nav>';
 
   shell(body, l.title);
-
-  /* زر الاشتراك الرسمي داخل شريط القناة (يعمل على الموقع الحي https فقط) */
-  initYtSubscribe();
 
   /* تفعيل العناصر التفاعلية */
   if (!l.stub) {
