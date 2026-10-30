@@ -29,6 +29,17 @@ function esc(s) {
 function pad2(n) { return String(n).padStart(2, "0"); }
 function videoPath(lesson) { return "videos/L" + lesson.level + "-" + pad2(lesson.num) + ".mp4"; }
 function captionPath(lesson) { return "captions/L" + lesson.level + "-" + pad2(lesson.num) + ".vtt"; }
+function lessonKey(lesson) { return "L" + lesson.level + "-" + pad2(lesson.num); }
+/* معرّف فيديو يوتيوب للدرس إن نُشر على قناة النادي (الخريطة في youtube-data.js) */
+function ytId(lesson) {
+  const m = window.ACADEMY_YT || {};
+  const id = m[lessonKey(lesson)];
+  return (typeof id === "string" && /^[A-Za-z0-9_-]{6,}$/.test(id)) ? id : null;
+}
+function localVideoHTML(l) {
+  return '<video class="lesson-video" controls preload="metadata" src="' + videoPath(l) + '">' +
+    '<track kind="captions" src="' + captionPath(l) + '" srclang="ar" label="العربية" default></video>';
+}
 /* الدرس التالي/السابق عابرًا لحدود المستويات: نهاية مستوى تصل ببداية الموالي */
 function nextLessonAfter(l) {
   const same = DATA.lessons.filter(x => x.level === l.level && x.num === l.num + 1)[0];
@@ -1164,10 +1175,23 @@ function renderLesson(id) {
   body += '<div class="lesson-head"><h1 class="page-title">' + esc(l.title) + '</h1>' + typeBadge(l.type) + '</div>';
   if (l.goal) body += '<p class="lesson-goal">🎯 هدف الدرس: ' + esc(l.goal) + '</p>';
 
-  body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' +
-    '<video class="lesson-video" controls preload="metadata" src="' + videoPath(l) + '">' +
-    '<track kind="captions" src="' + captionPath(l) + '" srclang="ar" label="العربية" default></video>' +
-    '<p class="muted small" id="video-note">ملف الفيديو المحلي: <span dir="ltr">' + videoPath(l) + '</span>' + (l.stub ? ' — سيُضاف عند إنتاجه.' : ' — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.') + '</p></section>';
+  /* مشغّل ذكي: إن نُشر الدرس على يوتيوب وكان الاتصال متاحًا، تظهر واجهة
+     خفيفة (صورة مصغّرة + زر تشغيل) لا تُحمّل مشغّل يوتيوب إلا عند الضغط،
+     وتبقى النسخة المحلية خيارًا دائمًا — وعند انقطاع الاتصال أو للدروس
+     غير المنشورة يعمل الملف المحلي مباشرة كما في نسخة الأوفلاين */
+  const yid = ytId(l);
+  const isOnline = (typeof navigator === "undefined") || navigator.onLine !== false;
+  if (yid && isOnline) {
+    body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' +
+      '<div class="yt-facade" id="yt-facade" data-yt="' + yid + '" role="button" tabindex="0" aria-label="تشغيل فيديو الدرس على يوتيوب" style="background-image:url(\'https://i.ytimg.com/vi/' + yid + '/hqdefault.jpg\')">' +
+      '<span class="yt-badge">YouTube</span><span class="yt-play" aria-hidden="true"></span>' +
+      '<span class="yt-facade-label">شاهد الدرس على يوتيوب — قناة Ai &amp; Robotics Club</span></div>' +
+      '<div id="yt-slot"></div>' +
+      '<p class="muted small" id="video-note">يُشغَّل هذا الدرس عبر يوتيوب مع الترجمة العربية. إن تعذّر التشغيل على شبكتك، جرّب <a href="#" id="yt-use-local">النسخة المحلية من الفيديو</a>.</p></section>';
+  } else {
+    body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' + localVideoHTML(l) +
+      '<p class="muted small" id="video-note">ملف الفيديو المحلي: <span dir="ltr">' + videoPath(l) + '</span>' + (l.stub ? ' — سيُضاف عند إنتاجه.' : ' — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.') + '</p></section>';
+  }
 
   if (l.stub) {
     body += '<section class="card soon-card"><h2>🚧 هذا الدرس قيد الإعداد</h2><p>العنوان والنوع جاهزان في الخريطة المعتمدة، وسيُضاف الشرح والكود والفيديو والاختبار تباعًا. تابع الدروس الجاهزة الآن، وعد إلى هنا قريبًا.</p></section>';
@@ -1253,11 +1277,42 @@ function renderLesson(id) {
 
   /* تفعيل العناصر التفاعلية */
   if (!l.stub) {
-    const vid = document.querySelector(".lesson-video");
     const vnote = $("#video-note");
-    if (vid && vnote) vid.addEventListener("error", () => {
-      vnote.textContent = "تعذّر تحميل فيديو الدرس على هذا الحاسوب — تأكد أن ملف الفيديو (" + videoPath(l) + ") موجود داخل مجلد videos بجانب المنصة، وتابع الدرس من الشرح والكود والاختبار في هذه الصفحة.";
-    });
+    const wireLocalError = (vid) => {
+      if (vid && vnote) vid.addEventListener("error", () => {
+        vnote.textContent = "تعذّر تحميل فيديو الدرس على هذا الحاسوب — تأكد أن ملف الفيديو (" + videoPath(l) + ") موجود داخل مجلد videos بجانب المنصة، وتابع الدرس من الشرح والكود والاختبار في هذه الصفحة.";
+      });
+    };
+    const facade = $("#yt-facade");
+    if (facade) {
+      /* واجهة يوتيوب: الضغط يُركّب المشغّل الفعلي (youtube-nocookie)،
+         ورابط «النسخة المحلية» يبقى متاحًا قبل التشغيل وبعده */
+      const mountLocal = () => {
+        const slot = $("#yt-slot");
+        if (slot) { slot.dataset.on = ""; slot.innerHTML = localVideoHTML(l); }
+        facade.hidden = true;
+        wireLocalError(document.querySelector(".lesson-video"));
+        if (vnote) vnote.textContent = "تشغّل الآن النسخة المحلية من الفيديو — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.";
+      };
+      const playYT = () => {
+        const slot = $("#yt-slot");
+        if (!slot || slot.dataset.on) return;
+        slot.dataset.on = "1";
+        facade.hidden = true;
+        slot.innerHTML = '<div class="yt-frame-wrap"><iframe class="yt-frame" src="https://www.youtube-nocookie.com/embed/' + facade.dataset.yt + '?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_lang_pref=ar" title="فيديو الدرس على يوتيوب" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>';
+        if (vnote) {
+          vnote.innerHTML = 'تشاهد الآن الدرس عبر يوتيوب. يمكنك أيضًا تجربة <a href="#" id="yt-use-local2">النسخة المحلية من الفيديو</a>.';
+          const sw2 = $("#yt-use-local2");
+          if (sw2) sw2.addEventListener("click", (e) => { e.preventDefault(); mountLocal(); });
+        }
+      };
+      facade.addEventListener("click", playYT);
+      facade.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); playYT(); } });
+      const sw = $("#yt-use-local");
+      if (sw) sw.addEventListener("click", (e) => { e.preventDefault(); mountLocal(); });
+    } else {
+      wireLocalError(document.querySelector(".lesson-video"));
+    }
   }
   if (!l.stub && l.experiment) {
     const slot = $("#experiment-slot");
