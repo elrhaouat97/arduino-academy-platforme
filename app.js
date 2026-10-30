@@ -1192,6 +1192,8 @@ function renderLesson(id) {
     body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' + localVideoHTML(l) +
       '<p class="muted small" id="video-note">ملف الفيديو المحلي: <span dir="ltr">' + videoPath(l) + '</span>' + (l.stub ? ' — سيُضاف عند إنتاجه.' : ' — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.') + '</p></section>';
   }
+  /* شريط القناة بجانب الفيديو: الاشتراك وزيارة القناة (طلب الأستاذ 2026-10-30) */
+  body += '<div class="yt-channel-bar"><span class="yt-channel-name">📺 قناتنا على يوتيوب: <strong>Ai &amp; Robotics Club</strong> — دروس الأردوينو والروبوتيك خطوة بخطوة</span><span class="yt-channel-actions"><a class="btn btn-subscribe" href="https://www.youtube.com/channel/UC4lRBYW3L2sZ9m-6_pXdcuw?sub_confirmation=1" target="_blank" rel="noopener">🔔 اشترك في القناة</a><a class="btn btn-ghost btn-small" href="https://www.youtube.com/@AiRoboticsClub-o3x" target="_blank" rel="noopener">زيارة القناة</a></span></div>';
 
   if (l.stub) {
     body += '<section class="card soon-card"><h2>🚧 هذا الدرس قيد الإعداد</h2><p>العنوان والنوع جاهزان في الخريطة المعتمدة، وسيُضاف الشرح والكود والفيديو والاختبار تباعًا. تابع الدروس الجاهزة الآن، وعد إلى هنا قريبًا.</p></section>';
@@ -1285,6 +1287,11 @@ function renderLesson(id) {
     };
     const facade = $("#yt-facade");
     if (facade) {
+      /* صورة الواجهة: نبدأ بصورة hqdefault فورًا، ثم نرقّي إلى maxresdefault
+         (الغلاف المخصّص كامل الجودة) متى توفّرت — فتظهر أغلفة الدروس في المنصة */
+      const hiImg = new Image();
+      hiImg.onload = () => { facade.style.backgroundImage = "url('https://i.ytimg.com/vi/" + facade.dataset.yt + "/maxresdefault.jpg')"; };
+      hiImg.src = "https://i.ytimg.com/vi/" + facade.dataset.yt + "/maxresdefault.jpg";
       /* واجهة يوتيوب: الضغط يُركّب المشغّل الفعلي (youtube-nocookie)،
          ورابط «النسخة المحلية» يبقى متاحًا قبل التشغيل وبعده */
       const mountLocal = () => {
