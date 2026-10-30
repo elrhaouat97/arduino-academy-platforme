@@ -7,5 +7,14 @@
    درسٌ بلا معرّف يعمل بملفه المحلي فقط، كما كان دائمًا.
    ============================================================ */
 window.ACADEMY_YT = {
-  "L1-01": "hDAmfSxWgQs"
+  "L1-01": "hDAmfSxWgQs",
+  "L1-02": "2StAnwTH-_Y",
+  "L1-03": "1DpnBonr0L4",
+  "L1-04": "pYEbmLxZtHI",
+  "L1-05": "9hzYbKz9oH8",
+  "L1-06": "gIA5VZWOsSE",
+  "L1-07": "ewzhjsWkDWA",
+  "L1-08": "2MdFyn_VUKQ",
+  "L1-09": "xISZKeS42Nk",
+  "L1-10": "C15YrSFJXak"
 };
