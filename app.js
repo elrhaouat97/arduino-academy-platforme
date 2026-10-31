@@ -813,7 +813,7 @@ function headerHTML() {
         '<a class="header-nav-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a>' +
         '<span class="header-sep" aria-hidden="true"></span>' +
         '<a class="btn-textlink" href="#/login">تسجيل الدخول</a>' +
-        '<a class="btn btn-primary btn-small btn-signup" href="#/register">سجّل مجانًا</a>' +
+        '<a class="btn btn-primary btn-pill btn-signup" href="#/register">سجّل مجانًا</a>' +
       '</div>';
   return '' +
   '<header class="site-header"><div class="header-inner">' +
@@ -860,9 +860,9 @@ function footerHTML() {
     '</div>' +
   '</footer>';
 }
-function shell(inner, pageTitle) {
+function shell(inner, pageTitle, pageMod) {
   ensureIconSprite();
-  app().innerHTML = '<a class="skip-link" href="#main">تجاوز إلى المحتوى الرئيسي</a>' + headerHTML() + '<main class="page" id="main" tabindex="-1">' + inner + '</main>' + footerHTML();
+  app().innerHTML = '<a class="skip-link" href="#main">تجاوز إلى المحتوى الرئيسي</a>' + headerHTML() + '<main class="page' + (pageMod ? " " + pageMod : "") + '" id="main" tabindex="-1">' + inner + '</main>' + footerHTML();
   if (pageTitle) document.title = pageTitle + " — أكاديمية الروبوتيك والذكاء الاصطناعي";
   /* رابط التجاوز: ينقل التركيز إلى المحتوى دون تغيير مسار الصفحة */
   const skip = document.querySelector(".skip-link");
@@ -891,13 +891,6 @@ function shell(inner, pageTitle) {
    الاختيار بين الدخول وإنشاء حساب. بطاقات المستويات تُبنى من بيانات
    المنصة نفسها (lessons-data) — العناوين وعدد الدروس الحقيقي لكل مستوى
    — فلا رقم مكتوبًا باليد يمكن أن يكذب مع تطوّر المنهاج */
-const LEVEL_THEMES = {
-  1: "أول خطواتك: الدوائر الكهربائية البسيطة، الصمام LED، وبرنامجك الأول.",
-  2: "تتحكم وتقرر: الأزرار، الشاشة التسلسلية، الشروط والدوال.",
-  3: "تقرأ العالم حولك: الحساسات والمشغلات — مسافة، حرارة، حركة وصوت.",
-  4: "تبني روبوتات كاملة: سيارة ذكية ومشروع تخرج من اختيارك.",
-  5: "المستوى المتقدم: ESP32 وإنترنت الأشياء والتحكم عبر البلوتوث."
-};
 function renderLanding() {
   /* أرقام شريط الإحصاءات تُشتقّ من البيانات لحظة العرض — لا رقم مكتوب باليد */
   const totalLessons = DATA.lessons.length;
@@ -907,45 +900,49 @@ function renderLanding() {
     const syllabus = lvLessons.map(l => '<li>' + esc(l.title) + '</li>').join("");
     return '<article class="landing-level-card" data-level="' + lv.n + '" tabindex="0" role="link" aria-label="سجّل وابدأ: المستوى ' + lv.n + ' — ' + esc(lv.title) + '">' +
       '<div class="landing-cover-wrap"><img class="landing-cover" src="' + levelIconPath(lv.n) + '" alt=""></div>' +
-      '<div class="landing-card-body">' +
-        '<h3>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h3>' +
-        '<p class="landing-desc">' + esc(LEVEL_THEMES[lv.n] || lv.title) + '</p>' +
-        '<p class="landing-meta">' +
-          '<span class="landing-count">' + icon("book", "icon-sm") + '<span>' + lvLessons.length + ' درسًا</span></span>' +
-          '<span class="landing-cert">' + icon("cap", "icon-sm") + '<span>شهادة إتمام المستوى</span></span>' +
-        '</p>' +
-        '<details class="landing-syllabus"><summary>محتوى المستوى</summary>' +
-          '<ol>' + syllabus + '</ol></details>' +
-        '<p class="landing-provider">من إعداد الأستاذ محمد الغوات — نادي الروبوتيك والذكاء الاصطناعي</p>' +
-      '</div>' +
+      '<h3>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h3>' +
+      '<p class="landing-meta">' +
+        '<span class="landing-count">' + icon("book", "icon-sm") + '<span>' + lvLessons.length + ' درسًا</span></span>' +
+        '<span class="meta-sep" aria-hidden="true">·</span>' +
+        '<span class="landing-cert">' + icon("cap", "icon-sm") + '<span>شهادة إتمام المستوى</span></span>' +
+      '</p>' +
+      '<p class="landing-provider">من إعداد الأستاذ محمد الغوات</p>' +
+      '<details class="landing-syllabus"><summary>محتوى المستوى</summary>' +
+        '<ol>' + syllabus + '</ol></details>' +
     '</article>';
   }).join("");
   const feature = (icoName, label) =>
-    '<div class="landing-feature"><span class="landing-feature-icon" aria-hidden="true">' + icon(icoName, "icon-lg") + '</span>' +
+    '<div class="landing-feature"><span class="landing-feature-icon" aria-hidden="true">' + icon(icoName, "icon-md") + '</span>' +
     '<span class="landing-feature-label">' + label + '</span></div>';
   /* بطاقات «مسارات الأكاديمية»: مسار الأردوينو وحده حيّ — أعداده مشتقة
      من البيانات (totalLevels/totalLessons أعلاه) لا أرقام مكتوبة باليد —
      والمسارات القادمة بطاقات ساكنة بلا روابط ولا أعداد ولا محتوى مُخترع */
   const arduinoTrackCard =
     '<article class="landing-track-card is-live" data-track="arduino" data-scroll="landing-levels" tabindex="0" role="link" aria-label="مسار الأردوينو والروبوتيك — متاح الآن، انتقل إلى مستوياته">' +
-      '<div class="track-card-top"><span class="track-icon-box">' + icon("cpu", "icon-md") + '</span><span class="track-badge track-badge-live">متاح الآن</span></div>' +
+      '<div class="track-cover-wrap"><img class="track-cover" src="assets/hero.png" alt=""></div>' +
+      '<span class="track-badge track-badge-live">متاح الآن</span>' +
       '<h3>الأردوينو والروبوتيك</h3>' +
-      '<p class="landing-track-desc">مسار الأكاديمية الأول والمتاح بكامله: إلكترونيات وبرمجة وروبوتات، من أول دائرة كهربائية إلى مشاريع متقدمة.</p>' +
-      '<p class="landing-track-meta"><span data-track-stat="levels">' + totalLevels + '</span> مستويات · <span data-track-stat="lessons">' + totalLessons + '</span> درسًا</p>' +
-      '<span class="landing-track-action"><span>عرض المستويات</span>' + icon("arrow-down", "icon-sm") + '</span>' +
+      '<p class="landing-track-meta">' +
+        '<span class="meta-item">' + icon("layers", "icon-sm") + '<span><span data-track-stat="levels">' + totalLevels + '</span> مستويات</span></span>' +
+        '<span class="meta-sep" aria-hidden="true">·</span>' +
+        '<span class="meta-item">' + icon("book", "icon-sm") + '<span><span data-track-stat="lessons">' + totalLessons + '</span> درسًا</span></span>' +
+      '</p>' +
+      '<p class="landing-provider">من إعداد الأستاذ محمد الغوات</p>' +
     '</article>';
   const soonTrackCard = (key, icoName, title, line) =>
     '<article class="landing-track-card is-soon" data-track="' + key + '">' +
-      '<div class="track-card-top"><span class="track-icon-box">' + icon(icoName, "icon-md") + '</span><span class="track-badge track-badge-soon">قريبًا</span></div>' +
+      '<div class="track-cover-wrap is-soon-cover" aria-hidden="true"><span class="track-soon-icon">' + icon(icoName, "icon-md") + '</span></div>' +
+      '<span class="track-badge track-badge-soon">قريبًا</span>' +
       '<h3>' + title + '</h3>' +
-      '<p class="landing-track-desc">' + line + '</p>' +
+      '<p class="landing-track-meta">' + line + '</p>' +
+      '<p class="landing-provider">من إعداد الأستاذ محمد الغوات</p>' +
     '</article>';
   const trackCards = arduinoTrackCard +
     soonTrackCard("python", "code", "لغة Python", "أساسيات البرمجة والتفكير المنطقي بلغة سهلة وواسعة الاستعمال.") +
     soonTrackCard("web", "globe", "صناعة المواقع", "بناء صفحات ومواقع الويب من الأساس، خطوة بخطوة.") +
     soonTrackCard("more", "layers", "مسارات برمجة أخرى", "لغات ومواضيع برمجة جديدة تُضاف تدريجيًا حسب جاهزيتها.");
   shell(
-    '<section class="landing-hero">' +
+    '<section class="landing-section landing-hero">' +
       '<svg class="hero-circuit-ornament" viewBox="0 0 600 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' +
         '<path d="M12 40h110l32 32h140M40 120h85l28-28h96M18 205h130l36-36h115M588 55H468l-34 34H320M565 175H450l-30 30H310" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
         '<circle cx="294" cy="72" r="4.5" fill="currentColor"/><circle cx="249" cy="92" r="4.5" fill="currentColor"/><circle cx="299" cy="169" r="4.5" fill="currentColor"/>' +
@@ -958,8 +955,8 @@ function renderLanding() {
           '<h1>تعلّم البرمجة والروبوتيك خطوة بخطوة — من أول دائرة كهربائية إلى روبوتات ذكية</h1>' +
           '<p class="landing-promise">أكاديمية عربية مجانية بتوجيه أستاذك، لتلاميذ الإعدادي وأولياء أمورهم. مسارنا الأول المتاح الآن: <strong>الأردوينو والروبوتيك</strong> — دروس فيديو قصيرة، توصيل موجّه خطوة بخطوة، واختبار في نهاية كل درس، حتى يبني التلميذ مشاريعه الحقيقية بنفسه.</p>' +
           '<div class="landing-ctas">' +
-            '<a class="btn btn-primary btn-lg" href="#/register">أنشئ حسابك مجانًا</a>' +
-            '<a class="btn btn-ghost btn-lg" href="#/login">تسجيل الدخول</a>' +
+            '<a class="btn btn-primary btn-pill" href="#/register">أنشئ حسابك مجانًا</a>' +
+            '<a class="btn btn-ghost" href="#/login">تسجيل الدخول</a>' +
           '</div>' +
           '<p class="landing-browse-row"><button class="landing-browse" type="button" data-scroll="landing-levels"><span>تصفح المستويات</span>' + icon("arrow-down", "icon-sm") + '</button></p>' +
           '<p class="landing-free">' + icon("check-circle", "icon-sm") + '<span>الأكاديمية مجانية بالكامل — أنشئ حسابك وابدأ أول درس في دقائق.</span></p>' +
@@ -975,13 +972,17 @@ function renderLanding() {
         '<div class="landing-stat"><span class="landing-stat-icon">' + icon("shield", "icon-md") + '</span><span class="landing-stat-num">مجاني</span><span class="landing-stat-label">بالكامل</span></div>' +
       '</div>' +
     '</section>' +
-    '<section class="landing-section card landing-about"><h2>' + icon("book", "icon-md") + '<span>عن الأكاديمية</span></h2>' +
-      '<p>«أكاديمية الروبوتيك والذكاء الاصطناعي» منصة تعليمية موجّهة إلى <strong>تلاميذ المرحلة الإعدادية</strong> لتعلّم الإلكترونيات والبرمجة والروبوتيك بالعربية، درسًا بعد درس ومشروعًا بعد مشروع. بدأت بمسار <strong>الأردوينو والروبوتيك</strong> — أول مساراتها — وستنضم إليه لاحقًا مسارات أخرى في البرمجة مثل بايثون وبناء المواقع، تُعلن هنا فور جاهزيتها.</p>' +
-      '<p>طريقتنا: <strong>دروس فيديو</strong> قصيرة وواضحة، <strong>توصيل موجّه</strong> للأسلاك والمكونات خطوة بخطوة، <strong>تجارب تفاعلية</strong> داخل المنصة تتدرب عليها قبل لمس المكونات الحقيقية، <strong>اختبار قصير</strong> في نهاية كل درس، و<strong>مشاريع تطبيقية</strong> تجمع ما تعلمته.</p>' +
-      '<p>تعمل الأكاديمية <strong>على الإنترنت</strong> من أي متصفح، وتتوفر أيضًا في <strong>نسخة دون اتصال</strong> تعمل كاملة على حاسوب القسم — وتقدّمك محفوظ ومحمي بحسابك الخاص.</p>' +
-      '<p class="about-parents-callout"><strong>لأولياء الأمور والمشرفين:</strong> الأكاديمية مجانية بالكامل وبلا إعلانات؛ يتقدّم كل تلميذ بوتيرته مع اختبارات موثّقة وشهادة عند إتمام كل مستوى، ويرافق أستاذ النادي التلاميذ ويتابع تقدّمهم.</p>' +
+    '<section class="landing-section">' +
+      '<div class="section-head"><span class="section-overline">أكاديمية الروبوتيك والذكاء الاصطناعي</span><h2 class="page-title">عن الأكاديمية</h2></div>' +
+      '<div class="card landing-about">' +
+        '<p>«أكاديمية الروبوتيك والذكاء الاصطناعي» منصة تعليمية موجّهة إلى <strong>تلاميذ المرحلة الإعدادية</strong> لتعلّم الإلكترونيات والبرمجة والروبوتيك بالعربية، درسًا بعد درس ومشروعًا بعد مشروع. بدأت بمسار <strong>الأردوينو والروبوتيك</strong> — أول مساراتها — وستنضم إليه لاحقًا مسارات أخرى في البرمجة مثل بايثون وبناء المواقع، تُعلن هنا فور جاهزيتها.</p>' +
+        '<p>طريقتنا: <strong>دروس فيديو</strong> قصيرة وواضحة، <strong>توصيل موجّه</strong> للأسلاك والمكونات خطوة بخطوة، <strong>تجارب تفاعلية</strong> داخل المنصة تتدرب عليها قبل لمس المكونات الحقيقية، <strong>اختبار قصير</strong> في نهاية كل درس، و<strong>مشاريع تطبيقية</strong> تجمع ما تعلمته.</p>' +
+        '<p>تعمل الأكاديمية <strong>على الإنترنت</strong> من أي متصفح، وتتوفر أيضًا في <strong>نسخة دون اتصال</strong> تعمل كاملة على حاسوب القسم — وتقدّمك محفوظ ومحمي بحسابك الخاص.</p>' +
+        '<p class="about-parents-callout"><strong>لأولياء الأمور والمشرفين:</strong> الأكاديمية مجانية بالكامل وبلا إعلانات؛ يتقدّم كل تلميذ بوتيرته مع اختبارات موثّقة وشهادة عند إتمام كل مستوى، ويرافق أستاذ النادي التلاميذ ويتابع تقدّمهم.</p>' +
+      '</div>' +
     '</section>' +
-    '<section class="landing-section landing-why"><div class="section-head"><h2 class="page-title">لماذا أكاديميتنا؟</h2></div>' +
+    '<section class="landing-section landing-why">' +
+      '<div class="section-head"><span class="section-overline">منهجية التعلّم</span><h2 class="page-title">لماذا أكاديميتنا؟</h2></div>' +
       '<div class="landing-features">' +
         feature("video", "دروس فيديو بالعربية المبسطة") +
         feature("flask", "تجارب تفاعلية داخل الدرس") +
@@ -990,15 +991,18 @@ function renderLanding() {
         feature("globe", "تعمل بالإنترنت وبدونها") +
       '</div>' +
     '</section>' +
-    '<section class="landing-section landing-tracks" id="landing-tracks"><div class="section-head"><h2 class="page-title">مسارات الأكاديمية</h2>' +
+    '<section class="landing-section landing-tracks" id="landing-tracks">' +
+      '<div class="section-head"><span class="section-overline">خريطة التعلّم</span><h2 class="page-title">مسارات الأكاديمية</h2>' +
       '<p class="landing-tracks-intro">الأكاديمية أوسع من مسار واحد: بدأت بالأردوينو والروبوتيك، وستضم تدريجيًا مسارات أخرى في البرمجة — يظهر كل مسار هنا فور جاهزيته.</p></div>' +
       '<div class="landing-track-grid">' + trackCards + '</div>' +
     '</section>' +
-    '<section class="landing-section landing-levels" id="landing-levels"><div class="section-head"><h2 class="page-title">المستويات والدورات</h2>' +
+    '<section class="landing-section landing-levels" id="landing-levels">' +
+      '<div class="section-head"><span class="section-overline">مسار الأردوينو والروبوتيك</span><h2 class="page-title">المستويات والدورات</h2>' +
       '<p class="landing-track-note">مسار <strong>الأردوينو والروبوتيك</strong> بالتفصيل: مستوياته المتدرجة من الصفر إلى المشاريع المتقدمة. اضغط أي بطاقة للتسجيل والبدء بها، وافتح «محتوى المستوى» لمعاينة دروسه قبل أن تبدأ.</p></div>' +
       '<div class="landing-level-grid">' + levelCards + '</div>' +
     '</section>' +
-    '<section class="landing-section card landing-steps"><h2>' + icon("layers", "icon-md") + '<span>كيف يعمل؟</span></h2>' +
+    '<section class="landing-section">' +
+      '<div class="section-head"><span class="section-overline">خطوات الدراسة</span><h2 class="page-title">كيف يعمل؟</h2></div>' +
       '<ol class="steps-list">' +
         '<li><strong>أنشئ حسابك</strong> — بالاستمارة الاحترافية أو بحساب Google، في دقيقة واحدة.</li>' +
         '<li><strong>تعلّم درسًا بعد درس</strong> — شاهد الفيديو، نفّذ التوصيل الموجّه، وجرّب بنفسك.</li>' +
@@ -1006,15 +1010,21 @@ function renderLanding() {
         '<li><strong>احصل على شهادة المستوى</strong> — أكمل دروس المستوى وتمرينه البرمجي لتصبح شهادتك جاهزة باسمك.</li>' +
       '</ol>' +
     '</section>' +
-    '<section class="landing-section card landing-certs">' +
-      '<div class="landing-cert-stage"><img class="landing-cert-img" src="assets/certificate.png" alt="نموذج من شهادة إتمام مستوى في الأكاديمية"></div>' +
-      '<div class="landing-cert-text"><h2>' + icon("award", "icon-md") + '<span>شهادات إتمام المستويات</span></h2>' +
-      '<p>حين يتمّ التلميذ جميع دروس مستوى ما، ويجتاز اختبار كل درس فيها (<strong>3 من 4</strong> على الأقل)، ويُنجز تمرين المستوى البرمجي، تصبح <strong>شهادة إتمام المستوى</strong> جاهزة للطباعة — وتُطبع <strong>باسم التلميذ الكامل كما سجّله</strong> في حسابه. شهادة لكل مستوى، من المستوى الأول حتى الخامس.</p></div>' +
+    '<section class="landing-section">' +
+      '<div class="section-head"><span class="section-overline">توثيق الإنجاز</span><h2 class="page-title">شهادات إتمام المستويات</h2></div>' +
+      '<div class="card landing-certs">' +
+        '<div class="landing-cert-stage"><img class="landing-cert-img" src="assets/certificate.png" alt="نموذج من شهادة إتمام مستوى في الأكاديمية"></div>' +
+        '<div class="landing-cert-text">' +
+          '<p>حين يتمّ التلميذ جميع دروس مستوى ما، ويجتاز اختبار كل درس فيها (<strong>3 من 4</strong> على الأقل)، ويُنجز تمرين المستوى البرمجي، تصبح <strong>شهادة إتمام المستوى</strong> جاهزة للطباعة — وتُطبع <strong>باسم التلميذ الكامل كما سجّله</strong> في حسابه. شهادة لكل مستوى، من المستوى الأول حتى الخامس.</p>' +
+        '</div>' +
+      '</div>' +
     '</section>' +
-    '<section class="landing-section landing-outro">' +
-      '<p class="landing-outro-title">جاهز لبناء أول دائرة لك؟</p>' +
-      '<div class="landing-ctas"><a class="btn btn-primary btn-lg" href="#/register">أنشئ حسابك مجانًا</a></div>' +
-    '</section>', "مرحبًا بك"
+    '<section class="landing-section landing-outro-sec">' +
+      '<div class="landing-outro">' +
+        '<p class="landing-outro-title">جاهز لبناء أول دائرة لك؟</p>' +
+        '<div class="landing-ctas"><a class="btn btn-primary" href="#/register">أنشئ حسابك مجانًا</a></div>' +
+      '</div>' +
+    '</section>', "مرحبًا بك", "page-landing"
   );
   /* عناصر «مرّر إلى المستويات»: زر «تصفح المستويات» وبطاقة مسار الأردوينو
      الحيّة — تمرير ناعم إلى فهرس المستويات دون لمس الموجّه. بطاقات
@@ -1361,13 +1371,18 @@ function renderHome() {
   const cards = DATA.levels.map(lv => {
     const st = levelStats(rec, lv.n);
     return '<a class="level-card" href="#/level/' + lv.n + '">' +
-      '<div class="level-card-top"><span class="level-head">' +
-      '<img class="level-icon" src="' + levelIconPath(lv.n) + '" alt="">' +
-      '<span class="level-num">المستوى ' + lv.n + '</span></span>' +
-      '<span class="level-count">' + st.done + ' / ' + st.total + ' دروس</span></div>' +
-      '<h2>' + esc(lv.title) + '</h2><p>' + esc(lv.goal) + '</p>' +
-      '<div class="progress"><div class="progress-fill" style="width:' + st.pct + '%"></div></div>' +
-      '<div class="progress-label">أنجزت ' + st.pct + '% من هذا المستوى</div>' +
+      '<div class="landing-cover-wrap"><img class="landing-cover" src="' + levelIconPath(lv.n) + '" alt=""></div>' +
+      '<h2>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h2>' +
+      '<p class="landing-meta">' +
+        '<span class="level-count">' + icon("book", "icon-sm") + '<span>' + st.done + ' / ' + st.total + ' دروس</span></span>' +
+        '<span class="meta-sep" aria-hidden="true">·</span>' +
+        '<span class="landing-cert">' + icon("cap", "icon-sm") + '<span>شهادة إتمام المستوى</span></span>' +
+      '</p>' +
+      '<p class="landing-provider">من إعداد الأستاذ محمد الغوات</p>' +
+      '<div class="level-progress-wrap">' +
+        '<div class="progress"><div class="progress-fill" style="width:' + st.pct + '%"></div></div>' +
+        '<div class="progress-label">أنجزت ' + st.pct + '% من هذا المستوى</div>' +
+      '</div>' +
       (levelComplete(rec, lv.n)
         ? (rec.playgroundPassed && rec.playgroundPassed[lv.n]
             ? '<div class="level-done-badge">' + icon("award", "icon-sm") + '<span>أكملت هذا المستوى — شهادتك جاهزة في صفحة المستوى</span></div>'
