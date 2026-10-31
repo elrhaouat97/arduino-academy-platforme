@@ -2,19 +2,34 @@
    أكاديمية الروبوتيك والذكاء الاصطناعي — منطق التطبيق (يعمل دون إنترنت)
    - الحسابات والتقدم: localStorage على هذا الحاسوب فقط
    - كلمات السر: لا تُحفظ أبدًا كما هي، بل بصمة SHA-256 مع ملح عشوائي
-   - الجولة الثالثة (Hybrid & Completion): لوحة أستاذ #/teacher بتجميع
-     ذاكري فقط، مفتاح أستاذ .academykey ببصمة محفوظة يحمي الاستعادة،
-     تمرين «ملعب الكود» شرط إضافي لفتح الشهادة فوق إتمام الدروس،
-     أسئلة تدريب quizExtra غير المُقيَّمة، روابط «راجع الفقرة» من حقل
-     section، وإطار موجّه عام لكل التجارب. المزامنة السحابية طبقة
-     منفصلة (sync.js + sync-config.js) تُحمَّل عند ضغط زرها فقط —
-     هذا الملف لا يعرف الشبكة إطلاقًا.
+   - الجولة الثالثة (Hybrid & Completion): مفتاح أستاذ .academykey
+     ببصمة محفوظة يحمي الاستعادة، تمرين «ملعب الكود» شرط إضافي لفتح
+     الشهادة فوق إتمام الدروس، أسئلة تدريب quizExtra غير المُقيَّمة،
+     روابط «راجع الفقرة» من حقل section، وإطار موجّه عام لكل التجارب.
+     المزامنة السحابية طبقة منفصلة (sync.js + sync-config.js) تُحمَّل
+     عند ضغط زرها فقط — هذا الملف لا يعرف الشبكة إطلاقًا.
+   - قرار المالك (2026-10-31): لوحة تتبّع الأستاذ نُقلت إلى منصة
+     مستقلة تمامًا (teacher.html + teacher.js + teacher.css) لها
+     دخولها الخاص وقاعدة بياناتها الخاصة؛ لا أثر لها في هذه المنصة:
+     لا رابط ولا مسار ولا واجهة. المنصة المستقلة تستورد النسخ
+     الاحتياطية التي يصدّرها التلاميذ من هنا بصيغتها نفسها.
    - الجولة الرابعة (هوية احترافية): التسجيل باستمارة مُتحقَّق منها
      (اسم كامل يُطبع على الشهادة، بريد إلكتروني فريد، كلمة سر قوية،
      سنّ، مستوى دراسي، مؤسسة)، والدخول بالبريد وكلمة السر بدل اسم
      المستخدم، وخيار الدخول/التسجيل عبر Google في وحدة كسولة منفصلة
      (auth-google.js) تُحمَّل عند ضغط زرها فقط — فيبقى هذا الملف
      بلا أي مرجع لعناوين Google وبلا أي نداء شبكي كما كان دائمًا.
+   - مواصفة المالك (2026-10-31، تحلّ محل ما يعارضها من الجولة الرابعة):
+     زر Google في شاشة الدخول وحدها — دخول Google الناجح يُنشئ الحساب
+     تلقائيًا من ملف Google (اسم شخصي/عائلي مشتقّان، صورة، بلا كلمة سر)
+     أو يدخّل صاحب حساب موجود، ومن لا كلمة سر له يُوجَّه أولًا إلى شاشة
+     «تعيين كلمة السر» (#/set-password). الاستمارة اليدوية بلا Google:
+     أساسيات لازمة (اسم شخصي، اسم عائلي، بريد، كلمة سر مؤكدة) ومعلومات
+     تكميلية اختيارية (سنّ/مستوى/مؤسسة) تُستكمل لاحقًا من الملف الشخصي
+     (#/profile) — والبريد فيه غير قابل للتغيير أبدًا. الاسم الكامل
+     (name/fullName) مشتقّ دائمًا من الشخصي + العائلي ويبقى ما يقرأه
+     الشهادات ولوحة الأستاذ. وشهادة المستوى لا تُطبع بفراغات: من نقصته
+     معلوماته الدراسية يرى تنبيهًا ودودًا يوجّهه إلى ملفه الشخصي.
    ============================================================ */
 "use strict";
 
@@ -81,7 +96,7 @@ function loadDB() {
     const clean = {};
     for (const k of Object.keys(db.users)) {
       const r = db.users[k];
-      if (r && typeof r === "object" && !Array.isArray(r)) clean[k] = r;
+      if (r && typeof r === "object" && !Array.isArray(r)) clean[k] = normalizeUserRecord(r);
     }
     db.users = clean;
     return db;
@@ -310,18 +325,56 @@ async function makePasswordRecord(password) {
   return { salt, hash, hashAlgo: HASH_ALGO };
 }
 
-/* ---------- حسابات التلاميذ: تحقق احترافي وهوية بالبريد (الجولة الرابعة) ----------
+/* ---------- حسابات التلاميذ: تحقق احترافي وهوية بالبريد ----------
    مفتاح السجل في قاعدة البيانات: للحسابات الجديدة هو البريد الإلكتروني
    نفسه (بأحرف صغيرة)، وللحسابات القديمة يبقى مفتاحها التاريخي (اسم
-   المستخدم) كما هو محفوظًا في حقل/مفتاح «legacy» — الدخول صار بالبريد
-   وكلمة السر، والبحث بالبريد يتجاهل حالة الأحرف. حسابات Google تحمل
-   provider: "google" ولا ملح/بصمة لها إطلاقًا (لا كلمة سر محلية). */
+   المستخدم) كما هو — الدخول بالبريد وكلمة السر، والبحث بالبريد يتجاهل
+   حالة الأحرف. نموذج الاسم (مواصفة 2026-10-31): firstName + lastName
+   هما الأصل، والاسم الكامل (name، ومرآته fullName) مشتقّ منهما دائمًا
+   ومخزّن محدّثًا لأنه ما تقرأه الشهادات ولوحة الأستاذ. حسابات Google
+   تُولد بلا ملح/بصمة (passwordSet: false) حتى يعيّن التلميذ كلمة سرّه
+   من شاشة التعيين أو ملفه الشخصي. */
 const SCHOOL_LEVELS = ["أولى إعدادي", "ثانية إعدادي", "ثالثة إعدادي"];
 function normalizeEmail(email) { return String(email == null ? "" : email).trim().toLowerCase(); }
-function nameFieldError(name) {
-  const v = String(name == null ? "" : name).trim();
-  if (!v) return "اكتب اسمك الكامل.";
-  if (v.length < 3) return "الاسم الكامل قصير جدًا — يجب أن يكون 3 أحرف على الأقل، لأنه سيظهر على شهاداتك كما كتبته.";
+/* تقسيم اسم كامل إلى شخصي (الكلمة الأولى) وعائلي (الباقي، قد يفرغ) */
+function splitFullName(name) {
+  const words = String(name == null ? "" : name).trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return { firstName: "", lastName: "" };
+  return { firstName: words[0], lastName: words.slice(1).join(" ") };
+}
+/* الاسم الكامل المشتقّ: الشخصي + العائلي مفصولين بمسافة، بلا فراغات زائدة */
+function deriveFullName(firstName, lastName) {
+  return (String(firstName == null ? "" : firstName).trim() + " " +
+          String(lastName == null ? "" : lastName).trim()).trim();
+}
+/* تطبيع سجل حساب عند القراءة (توافق خلفي): سجل قديم بلا اسمين منفصلين
+   يشتقّهما من اسمه الكامل، وسجل باسمين يجعل الكامل مشتقًّا منهما، وتبقى
+   fullName مرآة name دائمًا. في الذاكرة فقط — يُحفظ عند أول حفظ لاحق */
+function normalizeUserRecord(r) {
+  if (!r || typeof r !== "object") return r;
+  if (typeof r.name !== "string" && typeof r.fullName === "string") r.name = r.fullName;
+  if (typeof r.firstName === "string" && r.firstName.trim() !== "") {
+    if (typeof r.lastName !== "string") r.lastName = "";
+    const full = deriveFullName(r.firstName, r.lastName);
+    if (full) r.name = full;
+  } else if (typeof r.name === "string" && r.name.trim() !== "") {
+    const parts = splitFullName(r.name);
+    r.firstName = parts.firstName;
+    r.lastName = parts.lastName;
+  }
+  if (typeof r.name === "string") r.fullName = r.name;
+  return r;
+}
+function firstNameFieldError(firstName) {
+  const v = String(firstName == null ? "" : firstName).trim();
+  if (!v) return "اكتب اسمك الشخصي.";
+  if (v.length < 2) return "الاسم الشخصي قصير جدًا — يجب أن يكون حرفين على الأقل، لأنه سيظهر على شهاداتك.";
+  return null;
+}
+function lastNameFieldError(lastName) {
+  const v = String(lastName == null ? "" : lastName).trim();
+  if (!v) return "اكتب اسمك العائلي (النسب).";
+  if (v.length < 2) return "الاسم العائلي قصير جدًا — يجب أن يكون حرفين على الأقل، لأنه سيظهر على شهاداتك.";
   return null;
 }
 function emailFieldError(email) {
@@ -349,33 +402,47 @@ function passwordStrength(password) {
   if (v.length >= 12 || /[^A-Za-z0-9\u0621-\u064A\u0660-\u0669\u06F0-\u06F9\s]/.test(v)) score++;
   return Math.min(score, 3);
 }
+/* المعلومات التكميلية اختيارية (مواصفة 2026-10-31): الفارغ مقبول دائمًا،
+   والمملوء يُتحقّق منه بالقواعد نفسها — السنّ صحيح بين 8 و25، والمستوى
+   من القائمة، والمؤسسة 3 أحرف على الأقل */
 function ageFieldError(age) {
-  if (age === null || age === undefined || String(age).trim() === "") return "اكتب سنّك.";
+  if (age === null || age === undefined || String(age).trim() === "") return null;
   const n = Number(age);
   if (!Number.isInteger(n)) return "السنّ يجب أن يكون رقمًا صحيحًا (مثال: 12).";
   if (n < 8 || n > 25) return "السنّ المقبول في الأكاديمية بين 8 و25 سنة.";
   return null;
 }
 function levelFieldError(level) {
-  if (!level) return "اختر مستواك الدراسي من القائمة.";
+  if (!level) return null;
   if (SCHOOL_LEVELS.indexOf(level) < 0) return "اختر المستوى الدراسي من القائمة.";
   return null;
 }
 function schoolFieldError(school) {
   const v = String(school == null ? "" : school).trim();
-  if (!v) return "اكتب اسم مؤسستك (مدرستك/إعداديتك).";
+  if (!v) return null;
   if (v.length < 3) return "اسم المؤسسة قصير جدًا — اكتبه كاملًا (3 أحرف على الأقل).";
   return null;
 }
-/* تحقق الاستمارة الاحترافية كلها دفعة واحدة: يرجع خريطة {حقل: رسالة} */
+/* تحقق حقول التلميذ كلها دفعة واحدة: يرجع خريطة {حقل: رسالة}.
+   الأساسيات (شخصي/عائلي/بريد) لازمة دائمًا، والتكميلية عند ملئها فقط */
 function validateStudentFields(f) {
   const errs = {};
-  const e1 = nameFieldError(f.name); if (e1) errs.name = e1;
-  const e2 = emailFieldError(f.email); if (e2) errs.email = e2;
-  const e3 = ageFieldError(f.age); if (e3) errs.age = e3;
-  const e4 = levelFieldError(f.level); if (e4) errs.level = e4;
-  const e5 = schoolFieldError(f.school); if (e5) errs.school = e5;
+  const e1 = firstNameFieldError(f.firstName); if (e1) errs.firstName = e1;
+  const e2 = lastNameFieldError(f.lastName); if (e2) errs.lastName = e2;
+  const e3 = emailFieldError(f.email); if (e3) errs.email = e3;
+  const e4 = ageFieldError(f.age); if (e4) errs.age = e4;
+  const e5 = levelFieldError(f.level); if (e5) errs.level = e5;
+  const e6 = schoolFieldError(f.school); if (e6) errs.school = e6;
   return errs;
+}
+/* هل للحساب كلمة سر محلية معيّنة فعلًا؟ العلم passwordSet صريح في
+   السجلات الجديدة؛ والسجلات القديمة (بلا علم) تُحسم بمواد البصمة نفسها:
+   حساب استمارة قديم له ملح وبصمة فكلمة سرّه معيّنة، وحساب Google قديم
+   بلا مواد فلم تُعيَّن له كلمة سر قط */
+function passwordIsSet(rec) {
+  if (!rec || typeof rec !== "object") return false;
+  if (rec.passwordSet === false) return false;
+  return typeof rec.salt === "string" && !!rec.salt && typeof rec.hash === "string" && !!rec.hash;
 }
 function accountProvider(rec) { return rec && rec.provider === "google" ? "google" : "password"; }
 function findUserKeyByEmail(db, email) {
@@ -403,10 +470,11 @@ function resolveAccountKey(db, identifier) {
    نفسه الذي كان في شاشة التسجيل منذ الجولة الأولى) */
 async function createPasswordAccount(input) {
   const fields = {
-    name: String(input.name == null ? "" : input.name).trim(),
+    firstName: String(input.firstName == null ? "" : input.firstName).trim(),
+    lastName: String(input.lastName == null ? "" : input.lastName).trim(),
     email: normalizeEmail(input.email),
     age: input.age,
-    level: input.level,
+    level: input.level || "",
     school: String(input.school == null ? "" : input.school).trim()
   };
   const errors = validateStudentFields(fields);
@@ -420,24 +488,29 @@ async function createPasswordAccount(input) {
   if (findUserKeyByEmail(db, fields.email)) {
     return { ok: false, errors: { email: "هذا البريد الإلكتروني مسجّل من قبل — سجّل الدخول بدلًا من إنشاء حساب جديد، أو استعمل بريدًا آخر." } };
   }
+  const fullName = deriveFullName(fields.firstName, fields.lastName);
   db.users[fields.email] = {
-    name: fields.name, email: fields.email, provider: "password",
+    name: fullName, fullName: fullName,
+    firstName: fields.firstName, lastName: fields.lastName,
+    email: fields.email, provider: "password", passwordSet: true,
     salt: pw.salt, hash: pw.hash, hashAlgo: pw.hashAlgo,
-    age: Number(fields.age), level: fields.level, school: fields.school,
+    age: (fields.age === null || fields.age === undefined || String(fields.age).trim() === "") ? null : Number(fields.age),
+    level: fields.level, school: fields.school,
     createdAt: Date.now(), progress: {}
   };
   if (!saveDB(db)) return { ok: false, error: "تعذّر حفظ حسابك على هذا الحاسوب (التخزين ممتلئ أو محظور في المتصفح). أخبر الأستاذ وحاول من جديد." };
   return { ok: true, key: fields.email };
 }
-/* الدخول بالبريد وكلمة السر — حساب Google بالبريد نفسه يُوجَّه إلى زر
-   Google برسالة صريحة، ولا يُدمج ولا يُربط أي حساب بصمت أبدًا */
+/* الدخول بالبريد وكلمة السر — حساب Google لم تُعيَّن له كلمة سر بعدُ
+   يُوجَّه إلى زر Google برسالة صريحة (ومن هناك إلى شاشة تعيين كلمة
+   السر)؛ فإذا عيّنها صار الدخول بالبريد وكلمة السر يعمل كأي حساب */
 async function loginWithPassword(email, password) {
   const db = loadDB();
   const key = findUserKeyByEmail(db, email);
   if (!key) return { ok: false, error: "لا يوجد حساب بهذا البريد الإلكتروني. أنشئ حسابًا جديدًا أولًا." };
   const rec = db.users[key];
-  if (accountProvider(rec) === "google")
-    return { ok: false, error: "هذا الحساب أُنشئ عبر Google ولا كلمة سر له — استعمل زر «تسجيل الدخول مع Google» في الأعلى." };
+  if (!passwordIsSet(rec))
+    return { ok: false, error: "هذا الحساب أُنشئ عبر Google ولم تُعيَّن له كلمة سر بعد — سجّل الدخول بزر «تسجيل الدخول مع Google» في الأعلى، وستعيّن كلمة سرّك من هناك." };
   const okPass = await verifyPassword(rec, String(password == null ? "" : password));
   if (!okPass) return { ok: false, error: "كلمة السر غير صحيحة. حاول من جديد." };
   /* ترحيل الحسابات القديمة عند أول دخول ناجح (بصمة fnv: أو بلا نسخة
@@ -454,47 +527,130 @@ async function loginWithPassword(email, password) {
   }
   return { ok: true, key };
 }
-/* حسابات Google: التحقق من ملف Google نفسه قبل أي شيء */
+/* حسابات Google: التحقق من ملف Google نفسه قبل أي شيء — البريد الصالح
+   وحده شرط صلب؛ الاسم قد يفرغ في حسابات نادرة فيُشتقّ الاسم الشخصي
+   عندها من عنوان البريد نفسه حتى لا يولد حساب بلا اسم */
 function googleProfileError(profile) {
   if (!profile || typeof profile !== "object") return "تعذّرت قراءة بيانات حساب Google.";
   if (emailFieldError(profile.email)) return "حساب Google هذا بلا بريد إلكتروني صالح — اختر حسابًا آخر.";
-  if (nameFieldError(profile.name)) return "حساب Google هذا بلا اسم كامل صالح — اختر حسابًا آخر.";
   return null;
 }
-/* إتمام تسجيل Google: الاسم والبريد من ملف Google، والتلميذ يكمل
-   السنّ والمستوى والمؤسسة في الاستمارة نفسها؛ لا حقول كلمة سر إطلاقًا */
-function registerGoogleAccount(db, profile, extras) {
+/* إنشاء حساب Google تلقائيًا من ملفه (مواصفة 2026-10-31): الاسم يُقسَّم
+   شخصي/عائلي، والصورة من Google، والمعلومات التكميلية فارغة تُستكمل
+   لاحقًا من الملف الشخصي، ولا كلمة سر بعدُ (passwordSet: false) —
+   يُوجَّه التلميذ بعدها إلى شاشة تعيين كلمة السر. لا يُستدعى إلا عند
+   غياب أي حساب بهذا البريد؛ ووجود حساب يجعله يرفض صراحة دون لمسه */
+function registerGoogleAccount(db, profile) {
   const pErr = googleProfileError(profile);
   if (pErr) return { ok: false, error: pErr };
-  const fields = {
-    name: String(profile.name).trim(),
-    email: normalizeEmail(profile.email),
-    age: extras ? extras.age : "",
-    level: extras ? extras.level : "",
-    school: extras ? String(extras.school == null ? "" : extras.school).trim() : ""
-  };
-  const errors = validateStudentFields(fields);
-  if (Object.keys(errors).length) return { ok: false, errors };
-  const existing = findUserKeyByEmail(db, fields.email);
-  if (existing) {
-    return accountProvider(db.users[existing]) === "google"
-      ? { ok: false, errors: { email: "هذا الحساب موجود أصلًا عبر Google — اذهب إلى صفحة الدخول واضغط «تسجيل الدخول مع Google»." } }
-      : { ok: false, errors: { email: "هذا البريد مسجّل بحساب وكلمة سر — سجّل الدخول بكلمة السر بدلًا من إنشاء حساب جديد." } };
+  const email = normalizeEmail(profile.email);
+  if (findUserKeyByEmail(db, email)) {
+    return { ok: false, error: "هذا البريد مسجّل من قبل على هذا الحاسوب — سجّل الدخول بدلًا من إنشاء حساب جديد." };
   }
-  db.users[fields.email] = {
-    name: fields.name, email: fields.email, provider: "google",
-    age: Number(fields.age), level: fields.level, school: fields.school,
+  let parts = splitFullName(profile.name);
+  if (!parts.firstName) {
+    const local = email.split("@")[0] || "تلميذ";
+    parts = { firstName: local, lastName: "" };
+  }
+  const fullName = deriveFullName(parts.firstName, parts.lastName);
+  db.users[email] = {
+    name: fullName, fullName: fullName,
+    firstName: parts.firstName, lastName: parts.lastName,
+    email: email, provider: "google", passwordSet: false,
+    photo: typeof profile.picture === "string" ? profile.picture : "",
+    age: null, level: "", school: "",
     createdAt: Date.now(), progress: {}
   };
   if (!saveDB(db)) return { ok: false, error: "تعذّر حفظ حسابك على هذا الحاسوب (التخزين ممتلئ أو محظور في المتصفح). أخبر الأستاذ وحاول من جديد." };
-  return { ok: true, key: fields.email };
+  return { ok: true, key: email };
 }
-/* حالة بريد أمام دخول Google: حساب Google جاهز / حساب كلمة سر (رسالة
-   صريحة) / لا حساب — لا دمج ولا ربط صامت بين النوعين أبدًا */
+/* حالة بريد أمام دخول Google (مواصفة 2026-10-31): أي حساب موجود —
+   Google كان أو استمارة — يدخّل صاحبه بزر Google (مع ربط Google به
+   دون أي مساس ببياناته)، ومن لم تُعيَّن له كلمة سر بعدُ يُوجَّه إلى
+   شاشة تعيينها أولًا؛ ولا حساب إطلاقًا تعني الإنشاء التلقائي */
 function googleLoginState(db, email) {
   const key = findUserKeyByEmail(db, email);
   if (!key) return { status: "none" };
-  return accountProvider(db.users[key]) === "google" ? { status: "ok", key } : { status: "password" };
+  return { status: "ok", key: key, passwordSet: passwordIsSet(db.users[key]) };
+}
+/* تعيين أول كلمة سر لحساب بلا كلمة سر (شاشة #/set-password): القواعد
+   نفسها (قوة + تأكيد مطابق). حساب له كلمة سر أصلًا يُرفض هنا — تغييرها
+   من الملف الشخصي بـ changeAccountPassword وبكلمة السر الحالية */
+async function setInitialPassword(key, password, password2) {
+  const errors = {};
+  const pwErr = passwordFieldError(password);
+  if (pwErr) errors.password = pwErr;
+  if (String(password == null ? "" : password) !== String(password2 == null ? "" : password2))
+    errors.password2 = "كلمتا السر غير متطابقتين.";
+  if (Object.keys(errors).length) return { ok: false, errors };
+  const pw = await makePasswordRecord(String(password));
+  const db = loadDB();
+  if (!hasUser(db, key)) return { ok: false, error: "تعذّر العثور على حسابك على هذا الحاسوب — سجّل الدخول من جديد." };
+  const rec = db.users[key];
+  if (passwordIsSet(rec)) return { ok: false, error: "لهذا الحساب كلمة سر معيّنة أصلًا — غيّرها من ملفك الشخصي." };
+  rec.salt = pw.salt; rec.hash = pw.hash; rec.hashAlgo = pw.hashAlgo; rec.passwordSet = true;
+  if (!saveDB(db)) return { ok: false, error: "تعذّر حفظ كلمة السر على هذا الحاسوب (التخزين ممتلئ أو محظور في المتصفح). أخبر الأستاذ وحاول من جديد." };
+  return { ok: true, key: key };
+}
+/* تغيير كلمة السر من الملف الشخصي: الحالية مطلوبة متى كانت معيّنة،
+   والجديدة بقواعد القوة والتأكيد نفسها. عند غياب كلمة سر معيّنة أصلًا
+   يعمل كتعيين أول (لا حقل حالية) */
+async function changeAccountPassword(key, currentPassword, newPassword, newPassword2) {
+  const errors = {};
+  const pwErr = passwordFieldError(newPassword);
+  if (pwErr) errors.password = pwErr;
+  if (String(newPassword == null ? "" : newPassword) !== String(newPassword2 == null ? "" : newPassword2))
+    errors.password2 = "كلمتا السر غير متطابقتين.";
+  if (Object.keys(errors).length) return { ok: false, errors };
+  const db = loadDB();
+  if (!hasUser(db, key)) return { ok: false, error: "تعذّر العثور على حسابك على هذا الحاسوب." };
+  const rec = db.users[key];
+  if (passwordIsSet(rec)) {
+    const okCurrent = await verifyPassword(rec, String(currentPassword == null ? "" : currentPassword));
+    if (!okCurrent) return { ok: false, errors: { current: "كلمة السر الحالية غير صحيحة." } };
+  }
+  const pw = await makePasswordRecord(String(newPassword));
+  rec.salt = pw.salt; rec.hash = pw.hash; rec.hashAlgo = pw.hashAlgo; rec.passwordSet = true;
+  if (!saveDB(db)) return { ok: false, error: "تعذّر حفظ كلمة السر الجديدة على هذا الحاسوب (التخزين ممتلئ أو محظور في المتصفح)." };
+  return { ok: true, key: key };
+}
+/* حفظ الملف الشخصي: الاسم الشخصي/العائلي والمعلومات التكميلية بالقواعد
+   نفسها (التكميلية عند ملئها فقط)، والاسم الكامل يُعاد اشتقاقه وحفظه.
+   البريد الإلكتروني لا يُقرأ من الحقول إطلاقًا — غير قابل للتغيير حتى
+   لو عُبث بقيمة حقله في الصفحة؛ هوية الحساب لا تتحرك */
+function updateStudentProfile(key, fields) {
+  const db = loadDB();
+  if (!hasUser(db, key)) return { ok: false, error: "تعذّر العثور على حسابك على هذا الحاسوب." };
+  const f = {
+    firstName: String(fields && fields.firstName == null ? "" : fields.firstName).trim(),
+    lastName: String(fields && fields.lastName == null ? "" : fields.lastName).trim(),
+    age: fields ? fields.age : "",
+    level: fields && fields.level ? fields.level : "",
+    school: String(fields && fields.school == null ? "" : fields.school).trim()
+  };
+  const errors = {};
+  const e1 = firstNameFieldError(f.firstName); if (e1) errors.firstName = e1;
+  const e2 = lastNameFieldError(f.lastName); if (e2) errors.lastName = e2;
+  const e3 = ageFieldError(f.age); if (e3) errors.age = e3;
+  const e4 = levelFieldError(f.level); if (e4) errors.level = e4;
+  const e5 = schoolFieldError(f.school); if (e5) errors.school = e5;
+  if (Object.keys(errors).length) return { ok: false, errors };
+  const rec = db.users[key];
+  rec.firstName = f.firstName;
+  rec.lastName = f.lastName;
+  rec.name = deriveFullName(f.firstName, f.lastName);
+  rec.fullName = rec.name;
+  rec.age = (f.age === null || f.age === undefined || String(f.age).trim() === "") ? null : Number(f.age);
+  rec.level = f.level;
+  rec.school = f.school;
+  if (!saveDB(db)) return { ok: false, error: "تعذّر حفظ ملفك الشخصي على هذا الحاسوب (التخزين ممتلئ أو محظور في المتصفح)." };
+  return { ok: true, key: key };
+}
+/* صورة العرض الفعلية: المرفوعة من التلميذ تتقدّم دائمًا على صورة Google */
+function profilePhotoURL(rec) {
+  if (rec && typeof rec.photoUpload === "string" && rec.photoUpload) return rec.photoUpload;
+  if (rec && typeof rec.photo === "string" && rec.photo) return rec.photo;
+  return "";
 }
 
 /* ---------- النسخ الاحتياطي والاستعادة (تصدير/استيراد) ----------
@@ -515,10 +671,11 @@ function validateBackup(obj) {
   const users = {};
   for (const name of Object.keys(obj.users)) {
     const r = obj.users[name];
-    /* حسابات Google (provider: "google") لا ملح/بصمة لها بحكم التصميم —
-       تُطلب البصمة من حسابات كلمة السر فقط. النسخ القديمة (بعهد اسم
-       المستخدم، بلا بريد ولا حقول جديدة) تُقبل كما هي وتأخذ الحقول
-       الناقصة قيمًا فارغة آمنة، فلا ينهار لا الدخول ولا الاستعادة ولا اللوحة */
+    /* حسابات Google (provider: "google") قد تولد بلا ملح/بصمة (قبل تعيين
+       كلمة السر) أو تحملها (بعد تعيينها) — تُطلب البصمة من حسابات كلمة
+       السر وحدها، وتُحمل مواد Google متى وُجدت كما هي. النسخ القديمة
+       (بعهد اسم المستخدم، بلا بريد ولا حقول جديدة) تُقبل كما هي وتأخذ
+       الحقول الناقصة قيمًا فارغة آمنة، فلا ينهار لا الدخول ولا الاستعادة ولا اللوحة */
     const isGoogle = !!(r && typeof r === "object" && !Array.isArray(r) && r.provider === "google");
     if (!r || typeof r !== "object" || Array.isArray(r) || typeof r.name !== "string" ||
         (!isGoogle && (typeof r.salt !== "string" || typeof r.hash !== "string"))) {
@@ -526,8 +683,18 @@ function validateBackup(obj) {
     }
     users[name] = {
       name: r.name,
+      /* حقول مواصفة 2026-10-31: تُحمل عبر النسخ متى وُجدت، وغيابها في
+         النسخ القديمة آمن — يعيد loadDB اشتقاق الأسماء عند القراءة،
+         وpasswordSet الغائب يُحسم بمواد البصمة نفسها (passwordIsSet) */
+      firstName: typeof r.firstName === "string" ? r.firstName : undefined,
+      lastName: typeof r.lastName === "string" ? r.lastName : undefined,
+      fullName: typeof r.fullName === "string" ? r.fullName : undefined,
       email: typeof r.email === "string" ? normalizeEmail(r.email) : "",
       provider: isGoogle ? "google" : "password",
+      passwordSet: typeof r.passwordSet === "boolean" ? r.passwordSet : undefined,
+      googleLinked: r.googleLinked === true ? true : undefined,
+      photo: typeof r.photo === "string" ? r.photo : "",
+      photoUpload: typeof r.photoUpload === "string" ? r.photoUpload : undefined,
       username: typeof r.username === "string" ? r.username : undefined,
       salt: typeof r.salt === "string" ? r.salt : "",
       hash: typeof r.hash === "string" ? r.hash : "",
@@ -561,8 +728,9 @@ function mergeBackup(db, importedUsers, overwrite) {
 async function resetAccountPassword(key, newPassword) {
   const db = loadDB();
   if (!hasUser(db, key)) return false;
-  /* حساب Google لا كلمة سر محلية له — إعادة التعيين ترفضه صراحة حتى
-     لا يتحول بصمت إلى حساب كلمة سر (الدخول إليه بزر Google فقط) */
+  /* حسابات Google تبقى خارج إعادة تعيين الأستاذ: دخولها المضمون هو زر
+     Google نفسه، فلا تُعاد كتابة موادها من شاشة الاستعادة إطلاقًا —
+     حتى بعد تعيين التلميذ كلمة سرّه (تغييرها من ملفه الشخصي) */
   if (accountProvider(db.users[key]) === "google") return false;
   const pw = await makePasswordRecord(newPassword);
   const rec = db.users[key];
@@ -671,61 +839,6 @@ function certificateUnlocked(rec, n) {
   return levelComplete(rec, n) && !!(rec && rec.playgroundPassed && rec.playgroundPassed[n]);
 }
 
-/* ---------- لوحة الأستاذ: تجميع نتائج القسم في الذاكرة فقط ----------
-   الاستيراد إلى اللوحة لا يكتب في قاعدة بيانات هذا الحاسوب إطلاقًا:
-   تُبنى الصفوف من خريطة حسابات في ذاكرة الصفحة وتُنسى بإعادة التحميل */
-function buildTeacherRows(users) {
-  return Object.keys(users || {}).sort().map(username => {
-    const rec = users[username] || {};
-    let currentLevel = null, doneCount = 0, earned = 0, possible = 0, certificates = 0;
-    const perLevel = [];
-    for (let n = 1; n <= 5; n++) {
-      const st = levelStats(rec, n);
-      doneCount += st.done;
-      perLevel.push({ n, done: st.done, total: st.total });
-      if (certificateUnlocked(rec, n)) certificates++;
-      if (currentLevel === null && st.done < st.total) currentLevel = n;
-    }
-    DATA.lessons.forEach(l => {
-      const p = rec.progress && rec.progress[l.id];
-      if (p && typeof p.quizBest === "number" && p.quizTotal) { earned += p.quizBest; possible += p.quizTotal; }
-    });
-    const dates = {};
-    for (let n = 1; n <= 5; n++) {
-      const ts = rec.levelDates && rec.levelDates[n];
-      if (ts) { const d = new Date(ts); dates[n] = d.getFullYear() + "/" + pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()); }
-    }
-    return { username, name: rec.name || username,
-             email: typeof rec.email === "string" ? rec.email : "",
-             age: (typeof rec.age === "number" && isFinite(rec.age)) ? rec.age : null,
-             schoolLevel: typeof rec.level === "string" ? rec.level : "",
-             school: typeof rec.school === "string" ? rec.school : "",
-             provider: accountProvider(rec),
-             currentLevel, allComplete: currentLevel === null,
-             doneCount, totalLessons: TOTAL_LESSONS, earned, possible, dates,
-             /* المرحلة الثانية: تقدّم مصغّر لكل مستوى، نسبة عامة، عدد
-                الشهادات المفتوحة فعلًا (دروس + تمرين الملعب)، وآخر نشاط */
-             perLevel,
-             overallPct: TOTAL_LESSONS ? Math.round(doneCount / TOTAL_LESSONS * 100) : 0,
-             certificates,
-             createdAt: typeof rec.createdAt === "number" ? rec.createdAt : null,
-             updatedAt: typeof rec.updatedAt === "number" ? rec.updatedAt : null };
-  });
-}
-function teacherRowsToCSV(rows) {
-  const cell = v => '"' + String(v === null || v === undefined ? "" : v).replace(/"/g, '""') + '"';
-  const head = ["الاسم الكامل", "اسم المستخدم", "البريد الإلكتروني", "السن", "المستوى الدراسي", "المؤسسة", "المستوى الحالي", "دروس منجزة", "نقاط الاختبارات (مجموع أفضل النتائج)", "من أصل",
-    "تاريخ إتمام المستوى 1", "تاريخ إتمام المستوى 2", "تاريخ إتمام المستوى 3", "تاريخ إتمام المستوى 4", "تاريخ إتمام المستوى 5"];
-  const lines = [head.map(cell).join(",")];
-  rows.forEach(r => {
-    lines.push([r.name, r.username, r.email || "", r.age === null || r.age === undefined ? "" : r.age, r.schoolLevel || "", r.school || "",
-      r.allComplete ? "أكمل كل المستويات" : "المستوى " + r.currentLevel,
-      r.doneCount + " / " + r.totalLessons, r.earned, r.possible,
-      r.dates[1] || "", r.dates[2] || "", r.dates[3] || "", r.dates[4] || "", r.dates[5] || ""].map(cell).join(","));
-  });
-  return "\ufeff" + lines.join("\r\n"); /* BOM حتى يقرأ Excel العربية سليمة */
-}
-
 /* ---------- المزامنة السحابية الاختيارية (تُحمَّل عند الطلب فقط) ----------
    لا شيء هنا يلمس الشبكة: الزر يحقن sync-config.js ثم sync.js من مجلد المنصة
    نفسه لحظة الضغط فقط، والملفان منفصلان تمامًا عن ملفات المنصة الأساسية */
@@ -800,18 +913,26 @@ function icon(name, cls) {
 }
 
 /* ---------- ترويسة وتذييل الأكاديمية ---------- */
+/* وجه الحساب في الترويسة وفي الملف الشخصي: الصورة متى وُجدت (المرفوعة
+   تتقدّم على صورة Google)، وإلا دائرة بلون الهوية تحمل أول حرف من
+   الاسم الشخصي — مواصفة الملف الشخصي 2026-10-31 */
+function avatarHTML(rec, extraCls) {
+  const url = profilePhotoURL(rec);
+  const cls = "avatar" + (extraCls ? " " + extraCls : "");
+  if (url) return '<img class="' + cls + ' avatar-img" src="' + esc(url) + '" alt="">';
+  const initial = ((rec && (rec.firstName || rec.name)) || "؟").trim().charAt(0) || "؟";
+  return '<span class="' + cls + ' avatar-letter" aria-hidden="true">' + esc(initial) + '</span>';
+}
 function headerHTML() {
   const me = currentUser();
-  /* زائر غير مسجّل: الشريط العلوي الأبيض النظيف يعرض رابط مركز الأستاذ وزري الدخول/التسجيل دائمًا */
+  /* زائر غير مسجّل: الشريط العلوي الأبيض النظيف يعرض زري الدخول/التسجيل دائمًا */
   const userBox = me
     ? '<div class="user-box">' +
-        '<a class="header-nav-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a>' +
+        '<a class="account-chip" href="#/profile" aria-label="حسابي — الملف الشخصي" title="حسابي — الملف الشخصي">' + avatarHTML(me.rec) + '</a>' +
         '<span class="user-name">' + icon("user", "icon-sm") + '<span>' + esc(me.rec.name) + '</span></span>' +
         '<button class="btn btn-ghost btn-small" id="btn-logout" type="button">تسجيل الخروج</button>' +
       '</div>'
     : '<div class="user-box">' +
-        '<a class="header-nav-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a>' +
-        '<span class="header-sep" aria-hidden="true"></span>' +
         '<a class="btn-textlink" href="#/login">تسجيل الدخول</a>' +
         '<a class="btn btn-primary btn-pill btn-signup" href="#/register">سجّل مجانًا</a>' +
       '</div>';
@@ -840,7 +961,6 @@ function footerHTML() {
             '<li><a href="#/">الرئيسية</a></li>' +
             '<li><a href="#/login">تسجيل الدخول</a></li>' +
             '<li><a href="#/register">إنشاء حساب</a></li>' +
-            '<li><a href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a></li>' +
             '<li><a href="privacy.html">' + icon("shield", "icon-sm") + '<span>سياسة الخصوصية</span></a></li>' +
           '</ul>' +
         '</nav>' +
@@ -1060,10 +1180,10 @@ function renderLanding() {
 }
 
 /* ---------- شاشة الدخول / إنشاء حساب ---------- */
-/* ملف Google مؤقت أثناء إتمام تسجيل «مع Google»: يصل من وحدة الدخول
-   الكسولة بعد موافقة التلميذ، فيُكمل التلميذ السنّ/المستوى/المؤسسة في
-   الاستمارة نفسها. يعيش في ذاكرة الصفحة فقط، ويُلغى بترك شاشة التسجيل */
-let googlePending = null;
+/* حساب ينتظر تعيين أول كلمة سر بعد دخول Google (مواصفة 2026-10-31):
+   مفتاح سجله في قاعدة البيانات. يعيش في ذاكرة الصفحة فقط — من غادر
+   الشاشة وعاد بزر Google يجد التوجيه نفسه ما دامت كلمة السر غير معيّنة */
+let pendingPasswordKey = null;
 function fieldErrSpan(id) { return '<span class="field-error" id="' + id + '" role="alert" hidden></span>'; }
 function finishAuthLogin(key, showErr) {
   if (!storageSet(SESSION_KEY, key)) {
@@ -1077,7 +1197,7 @@ function finishAuthLogin(key, showErr) {
    عند الضغط فقط (النمط الكسول نفسه كالمزامنة). دون إنترنت أو عند فشل
    التحميل تظهر رسالة صريحة، وتبقى الاستمارة العادية عاملة دائمًا —
    فلا زر ميت ولا انهيار في أي بيئة (ومنها فتح الملفات محليًا) */
-async function startGoogleAuth(googleMode) {
+async function startGoogleAuth() {
   const msg = $("#auth-google-msg");
   const say = (t) => { if (msg) msg.textContent = t; };
   if (typeof navigator !== "undefined" && navigator && navigator.onLine === false) {
@@ -1094,86 +1214,97 @@ async function startGoogleAuth(googleMode) {
       say("تعذّرت بداية وحدة الدخول عبر Google في هذا المتصفح. استعمل الاستمارة العادية.");
       return;
     }
-    window.AcademyGoogle.signIn(googleMode, {
-      onProfile: (profile) => handleGoogleProfile(googleMode, profile),
+    window.AcademyGoogle.signIn("login", {
+      onProfile: (profile) => handleGoogleProfile(profile),
       onError: (m) => say(m)
     });
   } catch (e) {
     say("تعذّر تحميل وحدة الدخول عبر Google — تحقق من اتصالك بالإنترنت ثم حاول من جديد. الاستمارة العادية تعمل دائمًا.");
   }
 }
-function handleGoogleProfile(googleMode, profile) {
+/* معالجة ملف Google بعد موافقة التلميذ (مواصفة 2026-10-31 — زر Google
+   في شاشة الدخول وحدها):
+   - لا حساب بهذا البريد: يُنشأ تلقائيًا من ملف Google، ثم تعيين كلمة السر.
+   - حساب موجود: يُربط Google به (علم فقط — الاسم والصورة وبقية البيانات
+     التي عدّلها التلميذ لا تُمسّ أبدًا)، فإن كانت له كلمة سر معيّنة دخل
+     مباشرة، وإلا عُيّنت أولًا من شاشة التعيين قبل دخول المنصة */
+function handleGoogleProfile(profile) {
   const msg = $("#auth-google-msg");
   const say = (t) => { if (msg) msg.textContent = t; };
-  if (googleMode === "register") {
-    const pErr = googleProfileError(profile);
-    if (pErr) { say(pErr); return; }
-    const st = googleLoginState(loadDB(), profile.email);
-    if (st.status === "ok") { say("هذا الحساب موجود أصلًا عبر Google على هذا الحاسوب — اذهب إلى صفحة الدخول واضغط «تسجيل الدخول مع Google»."); return; }
-    if (st.status === "password") { say("هذا البريد مسجّل بحساب وكلمة سر — سجّل الدخول بكلمة السر بدلًا من إنشاء حساب جديد."); return; }
-    googlePending = { name: String(profile.name).trim(), email: normalizeEmail(profile.email) };
-    renderAuth("register");
-    return;
-  }
-  const st = googleLoginState(loadDB(), profile && profile.email);
-  if (st.status === "ok") {
-    if (!storageSet(SESSION_KEY, st.key)) { say("تعذّر حفظ جلسة الدخول على هذا الحاسوب (التخزين محظور)."); return; }
-    location.hash = "#/";
+  const pErr = googleProfileError(profile);
+  if (pErr) { say(pErr); return; }
+  const db = loadDB();
+  const st = googleLoginState(db, profile.email);
+  if (st.status === "none") {
+    const res = registerGoogleAccount(db, profile);
+    if (!res.ok) { say(res.error || "تعذّر إنشاء الحساب."); return; }
+    pendingPasswordKey = res.key;
+    location.hash = "#/set-password";
     render();
     return;
   }
-  if (st.status === "password") { say("هذا البريد مسجّل بحساب وكلمة سر — سجّل الدخول بكلمة السر في الاستمارة أسفله، لا بزر Google."); return; }
-  say("لا يوجد حساب بهذا البريد على هذا الحاسوب — أنشئ حسابًا جديدًا أولًا (يمكنك إنشاؤه بزر «المتابعة مع Google» في صفحة التسجيل).");
+  const rec = db.users[st.key];
+  if (rec && accountProvider(rec) !== "google" && !rec.googleLinked) {
+    rec.googleLinked = true;
+    saveDB(db);
+  }
+  if (!st.passwordSet) {
+    pendingPasswordKey = st.key;
+    location.hash = "#/set-password";
+    render();
+    return;
+  }
+  finishAuthLogin(st.key, say);
 }
 function renderAuth(mode) {
   const isReg = mode === "register";
-  if (!isReg) googlePending = null; /* ملف Google المؤقت يخصّ التسجيل وحده */
-  const gp = isReg ? googlePending : null;
-  const levelOptions = '<option value="">اختر المستوى</option>' +
+  const levelOptions = '<option value="">اختر المستوى (اختياري)</option>' +
     SCHOOL_LEVELS.map(lv => '<option value="' + esc(lv) + '">' + esc(lv) + '</option>').join("");
-  const googleBlock =
+  /* زر Google في شاشة الدخول وحدها (مواصفة 2026-10-31): من سجّل به
+     أول مرة يُنشأ حسابه تلقائيًا ثم يعيّن كلمة سرّه؛ واستمارة إنشاء
+     الحساب يدوية خالصة بلا أي خيار Google داخلها */
+  const googleBlock = isReg ? "" :
     '<div class="google-box">' +
       '<button class="btn btn-google" id="auth-google-btn" type="button"><span class="g-mark" aria-hidden="true">G</span>' +
-        (isReg ? "المتابعة مع Google" : "تسجيل الدخول مع Google") + '</button>' +
+        "تسجيل الدخول مع Google" + '</button>' +
       '<p class="muted small" id="auth-google-msg" role="status" aria-live="polite"></p>' +
     '</div>' +
-    '<div class="auth-divider" aria-hidden="true"><span>' + (isReg ? "أو بالاستمارة" : "أو بالبريد الإلكتروني وكلمة السر") + '</span></div>';
+    '<div class="auth-divider" aria-hidden="true"><span>أو بالبريد الإلكتروني وكلمة السر</span></div>';
   shell(
     '<section class="auth-card">' +
       '<h1>' + (isReg ? "إنشاء حساب تلميذ جديد" : "مرحبًا بعودتك") + '</h1>' +
       '<p class="muted">' + (isReg
-        ? "أنشئ حسابك بالاستمارة الاحترافية أسفله، أو تابع مع Google وسيُملأ اسمك وبريدك تلقائيًا. الاسم الكامل الذي تكتبه هنا هو الذي سيظهر على شهادات إتمام المستويات."
-        : "سجّل الدخول ببريدك الإلكتروني وكلمة السر، أو بزر «تسجيل الدخول مع Google» إن كنت أنشأت حسابك عبره.") + '</p>' +
+        ? "أنشئ حسابك بالاستمارة أسفله: المعلومات الأساسية لازمة، والتكميلية اختيارية يمكنك إكمالها لاحقًا من ملفك الشخصي — وستحتاجها الأكاديمية عند إصدار شهاداتك. اسمك الكامل (الشخصي + العائلي) هو الذي سيظهر على شهادات إتمام المستويات."
+        : "سجّل الدخول ببريدك الإلكتروني وكلمة السر، أو بزر «تسجيل الدخول مع Google» — وإن كانت أول مرة لك مع Google سيُنشأ حسابك تلقائيًا ثم تعيّن كلمة سرّك.") + '</p>' +
       '<p class="muted small">الحساب محلي: يُحفظ على هذا الحاسوب فقط، ولكل تلميذ تقدّمه الخاص. حدوده بصراحة: كلمة السر تمنع زميلًا فضوليًا من فتح حسابك داخل القسم، لكنها ليست حماية بمستوى المواقع والخوادم — فكل شيء يعيش في متصفح هذا الحاسوب، ومسح بيانات المتصفح يمسح الحسابات والتقدم معها.</p>' +
       (dbDamaged ? '<p class="form-error" role="alert">تنبيه: بيانات الحسابات المحفوظة على هذا الحاسوب تالفة ولا يمكن قراءتها، وقد احتفظنا بنسخة احتياطية منها تلقائيًا بدل مسحها. أنشئ حسابًا جديدًا للمتابعة، وأخبر الأستاذ.</p>' : "") +
-      (gp ? "" : googleBlock) +
-      (gp ? '<div class="google-note" role="status"><strong>التسجيل عبر Google:</strong> الاسم والبريد جاهزان من حسابك في Google. أكمل السنّ والمستوى الدراسي واسم المؤسسة فقط — حساب Google لا كلمة سر محلية له، ودخولك لاحقًا يكون بزر «تسجيل الدخول مع Google».' +
-            '<br><button class="btn btn-ghost btn-small" id="auth-google-cancel" type="button">إلغاء واستعمال الاستمارة العادية</button></div>' : "") +
+      googleBlock +
       '<form id="auth-form" autocomplete="off" novalidate>' +
-        (isReg ? '<label>الاسم الكامل<input id="auth-name" type="text" required maxlength="60" autocomplete="name" placeholder="مثال: يوسف بن علي العلوي"' + (gp ? ' value="' + esc(gp.name) + '"' : "") + '><span class="field-hint">اكتبه كما تريده أن يظهر في الشهادة — 3 أحرف على الأقل، وسيظهر على شهاداتك كما تكتبه هنا.</span>' + fieldErrSpan("err-name") + '</label>' : "") +
-        '<label>البريد الإلكتروني<input id="auth-email" type="email" required maxlength="80" autocomplete="email" placeholder="name@example.com" dir="ltr"' + (gp ? ' value="' + esc(gp.email) + '" readonly' : "") + '>' + fieldErrSpan("err-email") + '</label>' +
-        (gp ? "" :
-          '<label>كلمة السر<input id="auth-pass" type="password" required ' + (isReg ? 'minlength="8" autocomplete="new-password"' : 'autocomplete="current-password"') + ' placeholder="' + (isReg ? "8 أحرف على الأقل، بحرف ورقم" : "كلمة سر حسابك") + '" dir="ltr">' +
+        (isReg ? '<h2 class="auth-section-title">المعلومات الأساسية</h2>' +
+          '<label>الاسم الشخصي<input id="auth-firstname" type="text" required maxlength="40" autocomplete="given-name" placeholder="مثال: يوسف"><span class="field-hint">اكتبه كما تريده أن يظهر في الشهادة — حرفان على الأقل، وسيظهر اسمك الكامل على شهاداتك كما تكتبه هنا.</span>' + fieldErrSpan("err-firstname") + '</label>' +
+          '<label>الاسم العائلي (النسب)<input id="auth-lastname" type="text" required maxlength="40" autocomplete="family-name" placeholder="مثال: العلوي"><span class="field-hint">حرفان على الأقل.</span>' + fieldErrSpan("err-lastname") + '</label>' : "") +
+        '<label>البريد الإلكتروني<input id="auth-email" type="email" required maxlength="80" autocomplete="email" placeholder="name@example.com" dir="ltr">' + fieldErrSpan("err-email") + '</label>' +
+        '<label>كلمة السر<input id="auth-pass" type="password" required ' + (isReg ? 'minlength="8" autocomplete="new-password"' : 'autocomplete="current-password"') + ' placeholder="' + (isReg ? "8 أحرف على الأقل، بحرف ورقم" : "كلمة سر حسابك") + '" dir="ltr">' +
           (isReg ? '<span class="field-hint">القاعدة: 8 أحرف على الأقل، وفيها حرف واحد على الأقل ورقم واحد على الأقل.</span>' +
                    '<span class="pw-meter" aria-hidden="true"><span class="pw-meter-bar" id="pw-bar"></span></span>' +
                    '<span class="pw-label" id="pw-label" role="status"></span>' : "") +
-          fieldErrSpan("err-pass") + '</label>') +
-        (isReg && !gp ? '<label>تأكيد كلمة السر<input id="auth-pass2" type="password" required minlength="8" autocomplete="new-password" dir="ltr">' + fieldErrSpan("err-pass2") + '</label>' : "") +
-        (isReg ? '<label>السنّ<input id="auth-age" type="number" required min="8" max="25" step="1" inputmode="numeric" placeholder="مثال: 12" dir="ltr"><span class="field-hint">بين 8 و25 سنة.</span>' + fieldErrSpan("err-age") + '</label>' +
-                 '<label>المستوى الدراسي<select id="auth-level" required>' + levelOptions + '</select>' + fieldErrSpan("err-level") + '</label>' +
-                 '<label>اسم المؤسسة<input id="auth-school" type="text" required maxlength="80" placeholder="مثال: إعدادية الأمل">' + fieldErrSpan("err-school") + '</label>' : "") +
+          fieldErrSpan("err-pass") + '</label>' +
+        (isReg ? '<label>تأكيد كلمة السر<input id="auth-pass2" type="password" required minlength="8" autocomplete="new-password" dir="ltr">' + fieldErrSpan("err-pass2") + '</label>' : "") +
+        (isReg ? '<h2 class="auth-section-title">معلومات تكميلية — اختيارية، يمكن إكمالها لاحقًا من ملفك الشخصي</h2>' +
+                 '<label>السنّ<input id="auth-age" type="number" min="8" max="25" step="1" inputmode="numeric" placeholder="مثال: 12" dir="ltr"><span class="field-hint">اختياري — إن كتبته يجب أن يكون بين 8 و25 سنة.</span>' + fieldErrSpan("err-age") + '</label>' +
+                 '<label>المستوى الدراسي<select id="auth-level">' + levelOptions + '</select>' + fieldErrSpan("err-level") + '</label>' +
+                 '<label>اسم المؤسسة<input id="auth-school" type="text" maxlength="80" placeholder="مثال: إعدادية الأمل"><span class="field-hint">اختياري — اسم مدرستك/إعداديتك كما سيظهر في ملفك.</span>' + fieldErrSpan("err-school") + '</label>' : "") +
         '<p class="form-error" id="auth-error" role="alert" hidden></p>' +
-        '<button class="btn btn-primary btn-wide" type="submit">' + (isReg ? (gp ? "إتمام إنشاء الحساب مع Google والدخول" : "إنشاء الحساب والدخول") : "تسجيل الدخول") + '</button>' +
+        '<button class="btn btn-primary btn-wide" type="submit">' + (isReg ? "إنشاء الحساب والدخول" : "تسجيل الدخول") + '</button>' +
       '</form>' +
       '<p class="auth-switch">' + (isReg
         ? 'عندك حساب من قبل؟ <a href="#/login">سجّل الدخول</a>'
         : 'أول مرة هنا؟ <a href="#/register">أنشئ حسابك</a><br><a href="#/recover">نسيت كلمة السر؟ الاستعادة بمساعدة الأستاذ</a>') + '</p>' +
-      '<p class="auth-switch"><a class="inline-icon-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>لوحة الأستاذ — تجميع نتائج القسم من النسخ الاحتياطية</span></a></p>' +
     '</section>', isReg ? "إنشاء حساب جديد" : "تسجيل الدخول"
   );
   /* أخطاء الحقول: تُعرض تحت كل حقل بعينه، والقيم تبقى كما كتبها التلميذ */
-  const ERR_SPANS = { name: "err-name", email: "err-email", password: "err-pass", password2: "err-pass2", age: "err-age", level: "err-level", school: "err-school" };
-  const ERR_INPUTS = { name: "auth-name", email: "auth-email", password: "auth-pass", password2: "auth-pass2", age: "auth-age", level: "auth-level", school: "auth-school" };
+  const ERR_SPANS = { firstName: "err-firstname", lastName: "err-lastname", email: "err-email", password: "err-pass", password2: "err-pass2", age: "err-age", level: "err-level", school: "err-school" };
+  const ERR_INPUTS = { firstName: "auth-firstname", lastName: "auth-lastname", email: "auth-email", password: "auth-pass", password2: "auth-pass2", age: "auth-age", level: "auth-level", school: "auth-school" };
   const showFieldErrors = (errors) => {
     for (const k of Object.keys(ERR_SPANS)) {
       const span = document.getElementById(ERR_SPANS[k]);
@@ -1189,7 +1320,7 @@ function renderAuth(mode) {
   }
   /* مؤشر قوة كلمة السر الحي أثناء الكتابة (إرشادي؛ القاعدة فوق الحقل) */
   const passInput = $("#auth-pass");
-  if (passInput && isReg && !gp) {
+  if (passInput && isReg) {
     const bar = $("#pw-bar"), lab = $("#pw-label");
     const upd = () => {
       const s = passwordStrength(passInput.value);
@@ -1200,9 +1331,7 @@ function renderAuth(mode) {
     upd();
   }
   const gBtn = $("#auth-google-btn");
-  if (gBtn) gBtn.addEventListener("click", () => { startGoogleAuth(isReg ? "register" : "login"); });
-  const gCancel = $("#auth-google-cancel");
-  if (gCancel) gCancel.addEventListener("click", () => { googlePending = null; renderAuth("register"); });
+  if (gBtn) gBtn.addEventListener("click", () => { startGoogleAuth(); });
 
   let authBusy = false; /* حارس ضد الإرسال المكرر أثناء التشفير غير المتزامن */
   $("#auth-form").addEventListener("submit", async (ev) => {
@@ -1215,23 +1344,11 @@ function renderAuth(mode) {
     err.hidden = true;
     showFieldErrors(null);
     try {
-      if (isReg && gp) {
-        /* إتمام تسجيل Google: لا كلمة سر — الاسم قد يكون عدّله التلميذ
-           في الحقل، والبريد مقفل كما جاء من Google */
-        const res = registerGoogleAccount(loadDB(),
-          { name: $("#auth-name").value, email: gp.email },
-          { age: $("#auth-age").value, level: $("#auth-level").value, school: $("#auth-school").value });
-        if (!res.ok) {
-          if (res.errors) { showFieldErrors(res.errors); return; }
-          return showErr(res.error || "تعذّر إنشاء الحساب.");
-        }
-        googlePending = null;
-        return finishAuthLogin(res.key, showErr);
-      }
       if (isReg) {
         setBusy(true);
         const res = await createPasswordAccount({
-          name: $("#auth-name").value, email: $("#auth-email").value,
+          firstName: $("#auth-firstname").value, lastName: $("#auth-lastname").value,
+          email: $("#auth-email").value,
           password: $("#auth-pass").value, password2: $("#auth-pass2").value,
           age: $("#auth-age").value, level: $("#auth-level").value, school: $("#auth-school").value
         });
@@ -1257,6 +1374,270 @@ function renderAuth(mode) {
     } catch (e) {
       setBusy(false);
       return showErr("حدث خطأ غير متوقع. حاول من جديد.");
+    }
+  });
+}
+
+/* مؤشر قوة كلمة السر الحي — مشترك بين شاشات التعيين والملف الشخصي
+   (إرشادي فقط؛ بوابة القبول هي passwordFieldError دائمًا) */
+function wirePasswordMeter(input, bar, lab) {
+  if (!input) return;
+  const upd = () => {
+    const s = passwordStrength(input.value);
+    if (bar) { bar.style.width = (input.value ? (s + 1) * 25 : 0) + "%"; bar.className = "pw-meter-bar s" + s; }
+    if (lab) lab.textContent = input.value ? "قوة كلمة السر: " + ["ضعيفة", "مقبولة", "جيدة", "قوية"][s] : "";
+  };
+  input.addEventListener("input", upd);
+  upd();
+}
+
+/* ---------- شاشة تعيين كلمة السر (وجهة دخول Google الأول) ----------
+   تصلها المنصة من handleGoogleProfile حين لا كلمة سر معيّنة للحساب —
+   قبل أي دخول إلى المنصة. تعرض الاسم والبريد للقراءة فقط، ومهمّتها
+   الوحيدة: كلمة سر + تأكيدها بالقواعد نفسها وعدّاد القوة نفسه. من
+   غادرها وعاد بزر Google وجدها في انتظاره ما دامت كلمة السر غير معيّنة */
+function renderSetPassword() {
+  if (currentUser()) { location.hash = "#/"; return; }
+  const db = loadDB();
+  const key = pendingPasswordKey;
+  if (!key || !hasUser(db, key)) { location.hash = "#/login"; return; }
+  const rec = db.users[key];
+  if (passwordIsSet(rec)) { /* عُيّنت في نافذة أخرى مثلًا: دخول عادي */
+    pendingPasswordKey = null;
+    finishAuthLogin(key, (m) => { location.hash = "#/login"; });
+    return;
+  }
+  shell(
+    '<section class="auth-card">' +
+      '<h1>عيّن كلمة سر لحسابك</h1>' +
+      '<div class="setpw-identity">' + avatarHTML(rec, "avatar-lg") +
+        '<div><p class="setpw-name">' + esc(rec.name || key) + '</p>' +
+        '<p class="setpw-email" dir="ltr">' + esc(rec.email || key) + '</p></div>' +
+      '</div>' +
+      '<p class="muted">حسابك جاهز من Google — بقيت خطوة واحدة: اختر كلمة سر لحسابك في الأكاديمية وأكّدها، حتى تدخل لاحقًا ببريدك وكلمة سرّك أيضًا، لا بزر Google وحده.</p>' +
+      '<form id="setpw-form" autocomplete="off" novalidate>' +
+        '<label>كلمة السر<input id="setpw-pass" type="password" required minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل، بحرف ورقم" dir="ltr">' +
+          '<span class="field-hint">القاعدة: 8 أحرف على الأقل، وفيها حرف واحد على الأقل ورقم واحد على الأقل.</span>' +
+          '<span class="pw-meter" aria-hidden="true"><span class="pw-meter-bar" id="setpw-bar"></span></span>' +
+          '<span class="pw-label" id="setpw-label" role="status"></span>' +
+          fieldErrSpan("err-setpw-pass") + '</label>' +
+        '<label>تأكيد كلمة السر<input id="setpw-pass2" type="password" required minlength="8" autocomplete="new-password" dir="ltr">' + fieldErrSpan("err-setpw-pass2") + '</label>' +
+        '<p class="form-error" id="setpw-error" role="alert" hidden></p>' +
+        '<button class="btn btn-primary btn-wide" type="submit">حفظ كلمة السر والدخول إلى المنصة</button>' +
+      '</form>' +
+      '<p class="auth-switch"><a href="#/login">عودة إلى تسجيل الدخول</a></p>' +
+    '</section>', "تعيين كلمة السر"
+  );
+  wirePasswordMeter($("#setpw-pass"), $("#setpw-bar"), $("#setpw-label"));
+  const spans = { password: "err-setpw-pass", password2: "err-setpw-pass2" };
+  const showFieldErrors = (errors) => {
+    for (const k of Object.keys(spans)) {
+      const span = document.getElementById(spans[k]);
+      if (!span) continue;
+      if (errors && errors[k]) { span.textContent = errors[k]; span.hidden = false; }
+      else span.hidden = true;
+    }
+  };
+  let busy = false;
+  $("#setpw-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (busy) return;
+    const err = $("#setpw-error");
+    const showErr = (m) => { err.textContent = m; err.hidden = false; };
+    err.hidden = true;
+    showFieldErrors(null);
+    busy = true;
+    const btn = ev.target.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await setInitialPassword(key, $("#setpw-pass").value, $("#setpw-pass2").value);
+      if (!res.ok) {
+        if (res.errors) { showFieldErrors(res.errors); return; }
+        return showErr(res.error || "تعذّر تعيين كلمة السر.");
+      }
+      pendingPasswordKey = null;
+      return finishAuthLogin(res.key, showErr);
+    } catch (e) {
+      return showErr("حدث خطأ غير متوقع. حاول من جديد.");
+    } finally {
+      busy = false;
+      if (btn) btn.disabled = false;
+    }
+  });
+}
+
+/* ---------- الملف الشخصي للتلميذ (#/profile) ----------
+   كل معلومات التلميذ في مكان واحد قابل للتحرير: الصورة (رفع مصغّر
+   يُحفظ داخل السجل نفسه فيزامَن)، الاسم الشخصي/العائلي، المعلومات
+   التكميلية، وتغيير كلمة السر — والبريد الإلكتروني معروض للقراءة
+   فقط ولا يقبل التغيير إطلاقًا (updateStudentProfile لا يقرأه أصلًا) */
+function renderProfile() {
+  const me = currentUser();
+  if (!me) { location.hash = "#/login"; return; }
+  const rec = me.rec;
+  const hasPw = passwordIsSet(rec);
+  const levelOptions = '<option value="">اختر المستوى (اختياري)</option>' +
+    SCHOOL_LEVELS.map(lv => '<option value="' + esc(lv) + '"' + (rec.level === lv ? " selected" : "") + '>' + esc(lv) + '</option>').join("");
+  shell(
+    '<p class="crumbs"><a href="#/">→ عودة إلى الرئيسية</a></p>' +
+    '<section class="auth-card profile-card">' +
+      '<h1>ملفي الشخصي</h1>' +
+      '<div class="profile-photo-block">' +
+        avatarHTML(rec, "avatar-xl") +
+        '<div class="profile-photo-actions">' +
+          '<label class="btn btn-ghost btn-small profile-upload-btn">' + icon("upload", "icon-sm") + '<span>تغيير الصورة</span>' +
+            '<input id="profile-photo-input" type="file" accept="image/*" hidden></label>' +
+          (typeof rec.photoUpload === "string" && rec.photoUpload
+            ? '<button class="btn btn-ghost btn-small" id="profile-photo-remove" type="button">إزالة الصورة المرفوعة</button>' : "") +
+          '<p class="muted small">اختر صورة من جهازك — تُصغَّر تلقائيًا وتُحفظ في حسابك.' +
+          (typeof rec.photo === "string" && rec.photo ? ' صورتك الحالية من حساب Google ما لم ترفع صورة خاصة.' : '') + '</p>' +
+          '<p class="form-error" id="profile-photo-error" role="alert" hidden></p>' +
+        '</div>' +
+      '</div>' +
+      '<form id="profile-form" autocomplete="off" novalidate>' +
+        '<h2 class="auth-section-title">معلوماتي</h2>' +
+        '<label>الاسم الشخصي<input id="profile-firstname" type="text" required maxlength="40" autocomplete="given-name" value="' + esc(rec.firstName || "") + '"><span class="field-hint">كما تريده أن يظهر في الشهادة.</span>' + fieldErrSpan("err-p-firstname") + '</label>' +
+        '<label>الاسم العائلي (النسب)<input id="profile-lastname" type="text" required maxlength="40" autocomplete="family-name" value="' + esc(rec.lastName || "") + '">' + fieldErrSpan("err-p-lastname") + '</label>' +
+        '<label>البريد الإلكتروني<input id="profile-email" type="email" value="' + esc(rec.email || me.key) + '" disabled dir="ltr"><span class="field-hint">لا يمكن تغيير البريد الإلكتروني — هو هوية حسابك في الأكاديمية.</span></label>' +
+        '<h2 class="auth-section-title">معلومات تكميلية — اختيارية، يمكن إكمالها لاحقًا من ملفك الشخصي</h2>' +
+        '<label>السنّ<input id="profile-age" type="number" min="8" max="25" step="1" inputmode="numeric" placeholder="مثال: 12" dir="ltr" value="' + (typeof rec.age === "number" ? rec.age : "") + '"><span class="field-hint">اختياري — إن كتبته يجب أن يكون بين 8 و25 سنة.</span>' + fieldErrSpan("err-p-age") + '</label>' +
+        '<label>المستوى الدراسي<select id="profile-level">' + levelOptions + '</select>' + fieldErrSpan("err-p-level") + '</label>' +
+        '<label>اسم المؤسسة<input id="profile-school" type="text" maxlength="80" placeholder="مثال: إعدادية الأمل" value="' + esc(rec.school || "") + '">' + fieldErrSpan("err-p-school") + '</label>' +
+        '<p class="form-error" id="profile-error" role="alert" hidden></p>' +
+        '<p class="quiz-result ok" id="profile-ok" role="status" hidden></p>' +
+        '<button class="btn btn-primary btn-wide" type="submit">' + icon("save", "icon-sm") + '<span>حفظ المعلومات</span></button>' +
+      '</form>' +
+      '<form id="password-form" autocomplete="off" novalidate>' +
+        '<h2 class="auth-section-title">' + (hasPw ? "تغيير كلمة السر" : "تعيين كلمة سر") + '</h2>' +
+        (hasPw ? '<label>كلمة السر الحالية<input id="profile-curpass" type="password" required autocomplete="current-password" dir="ltr">' + fieldErrSpan("err-pw-current") + '</label>' : "") +
+        '<label>كلمة السر الجديدة<input id="profile-newpass" type="password" required minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل، بحرف ورقم" dir="ltr">' +
+          '<span class="field-hint">القاعدة: 8 أحرف على الأقل، وفيها حرف واحد على الأقل ورقم واحد على الأقل.</span>' +
+          '<span class="pw-meter" aria-hidden="true"><span class="pw-meter-bar" id="profile-pw-bar"></span></span>' +
+          '<span class="pw-label" id="profile-pw-label" role="status"></span>' +
+          fieldErrSpan("err-pw-pass") + '</label>' +
+        '<label>تأكيد كلمة السر الجديدة<input id="profile-newpass2" type="password" required minlength="8" autocomplete="new-password" dir="ltr">' + fieldErrSpan("err-pw-pass2") + '</label>' +
+        '<p class="form-error" id="password-error" role="alert" hidden></p>' +
+        '<p class="quiz-result ok" id="password-ok" role="status" hidden></p>' +
+        '<button class="btn btn-primary btn-wide" type="submit">' + icon("key", "icon-sm") + '<span>' + (hasPw ? "حفظ كلمة السر الجديدة" : "تعيين كلمة السر") + '</span></button>' +
+      '</form>' +
+    '</section>', "الملف الشخصي"
+  );
+  /* --- تغيير الصورة: قراءة الملف، تصغير على لوحة الرسم إلى 256×256
+     كحد أقصى، وحفظ JPEG داخل السجل نفسه (فتزامنه طبقة المزامنة كأي
+     حقل آخر). أي فشل يُعرض صراحة ولا يمسّ الصورة الحالية --- */
+  const photoInput = $("#profile-photo-input");
+  if (photoInput) photoInput.addEventListener("change", () => {
+    const errEl = $("#profile-photo-error");
+    const showPhotoErr = (m) => { if (errEl) { errEl.textContent = m; errEl.hidden = false; } };
+    const file = photoInput.files && photoInput.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type || "")) { showPhotoErr("اختر ملف صورة (JPG أو PNG مثلًا)."); return; }
+    const reader = new FileReader();
+    reader.onerror = () => showPhotoErr("تعذّرت قراءة ملف الصورة — حاول صورة أخرى.");
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => showPhotoErr("الملف المختار ليس صورة صالحة — حاول صورة أخرى.");
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, 256 / Math.max(img.width || 1, img.height || 1));
+          const w = Math.max(1, Math.round((img.width || 1) * scale));
+          const h = Math.max(1, Math.round((img.height || 1) * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = w; canvas.height = h;
+          const cx = canvas.getContext("2d");
+          if (!cx) { showPhotoErr("متصفحك لا يدعم معالجة الصور هنا — حاول متصفحًا آخر."); return; }
+          cx.drawImage(img, 0, 0, w, h);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+          const db2 = loadDB();
+          if (!hasUser(db2, me.key)) { showPhotoErr("تعذّر العثور على حسابك — سجّل الدخول من جديد."); return; }
+          db2.users[me.key].photoUpload = dataUrl;
+          if (!saveDB(db2)) { showPhotoErr("تعذّر حفظ الصورة على هذا الحاسوب (التخزين ممتلئ أو محظور)."); return; }
+          renderProfile();
+        } catch (e) {
+          showPhotoErr("تعذّرت معالجة الصورة — حاول صورة أخرى.");
+        }
+      };
+      img.src = String(reader.result || "");
+    };
+    reader.readAsDataURL(file);
+  });
+  const removeBtn = $("#profile-photo-remove");
+  if (removeBtn) removeBtn.addEventListener("click", () => {
+    const db2 = loadDB();
+    if (!hasUser(db2, me.key)) return;
+    delete db2.users[me.key].photoUpload;
+    if (saveDB(db2)) renderProfile();
+  });
+  /* --- حفظ المعلومات: الحقول تُقرأ كلها إلا البريد — معطّل في الواجهة
+     ومتجاهَل في منطق الحفظ، فلا عبث بالصفحة يحرّك هوية الحساب --- */
+  const P_SPANS = { firstName: "err-p-firstname", lastName: "err-p-lastname", age: "err-p-age", level: "err-p-level", school: "err-p-school" };
+  const showProfileErrors = (errors) => {
+    for (const k of Object.keys(P_SPANS)) {
+      const span = document.getElementById(P_SPANS[k]);
+      if (!span) continue;
+      if (errors && errors[k]) { span.textContent = errors[k]; span.hidden = false; }
+      else span.hidden = true;
+    }
+  };
+  $("#profile-form").addEventListener("submit", (ev) => {
+    ev.preventDefault();
+    const err = $("#profile-error"), ok = $("#profile-ok");
+    err.hidden = true; ok.hidden = true;
+    showProfileErrors(null);
+    const res = updateStudentProfile(me.key, {
+      firstName: $("#profile-firstname").value,
+      lastName: $("#profile-lastname").value,
+      age: $("#profile-age").value,
+      level: $("#profile-level").value,
+      school: $("#profile-school").value
+    });
+    if (!res.ok) {
+      if (res.errors) { showProfileErrors(res.errors); return; }
+      err.textContent = res.error || "تعذّر حفظ ملفك الشخصي."; err.hidden = false;
+      return;
+    }
+    ok.textContent = "حُفظت معلوماتك بنجاح، وسيظهر اسمك الجديد في الترويسة وشهاداتك.";
+    ok.hidden = false;
+    setTimeout(() => render(), 900);
+  });
+  /* --- تغيير/تعيين كلمة السر --- */
+  wirePasswordMeter($("#profile-newpass"), $("#profile-pw-bar"), $("#profile-pw-label"));
+  const PW_SPANS = { current: "err-pw-current", password: "err-pw-pass", password2: "err-pw-pass2" };
+  const showPwErrors = (errors) => {
+    for (const k of Object.keys(PW_SPANS)) {
+      const span = document.getElementById(PW_SPANS[k]);
+      if (!span) continue;
+      if (errors && errors[k]) { span.textContent = errors[k]; span.hidden = false; }
+      else span.hidden = true;
+    }
+  };
+  let pwBusy = false;
+  $("#password-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    if (pwBusy) return;
+    const err = $("#password-error"), ok = $("#password-ok");
+    err.hidden = true; ok.hidden = true;
+    showPwErrors(null);
+    pwBusy = true;
+    const btn = ev.target.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+    try {
+      const cur = $("#profile-curpass");
+      const res = await changeAccountPassword(me.key, cur ? cur.value : "",
+        $("#profile-newpass").value, $("#profile-newpass2").value);
+      if (!res.ok) {
+        if (res.errors) { showPwErrors(res.errors); return; }
+        err.textContent = res.error || "تعذّر تغيير كلمة السر."; err.hidden = false;
+        return;
+      }
+      ok.textContent = "حُفظت كلمة السر الجديدة — استعملها في دخولك القادم بالبريد وكلمة السر.";
+      ok.hidden = false;
+      ev.target.reset();
+    } catch (e) {
+      err.textContent = "حدث خطأ غير متوقع. حاول من جديد."; err.hidden = false;
+    } finally {
+      pwBusy = false;
+      if (btn) btn.disabled = false;
     }
   });
 }
@@ -1340,7 +1721,7 @@ function renderRecover() {
       const key = resolveAccountKey(dbNow, identifier);
       if (!key) return showErr("لا يوجد حساب بهذا البريد على هذا الحاسوب. تأكد من البريد الإلكتروني (أو من اسم المستخدم للحسابات القديمة).");
       if (accountProvider(dbNow.users[key]) === "google")
-        return showErr("هذا الحساب مسجّل عبر Google ولا كلمة سر محلية له — دخوله يكون بزر «تسجيل الدخول مع Google» في صفحة الدخول، فلا حاجة إلى إعادة تعيين.");
+        return showErr("هذا الحساب مسجّل عبر Google — دخوله يكون بزر «تسجيل الدخول مع Google» في صفحة الدخول، فلا حاجة إلى إعادة تعيين.");
       const done = await resetAccountPassword(key, password);
       if (!done) return showErr("تعذّر حفظ كلمة السر الجديدة على هذا الحاسوب (التخزين ممتلئ أو محظور). أخبر الأستاذ وحاول من جديد.");
       err.hidden = true;
@@ -1551,6 +1932,25 @@ function renderCertificate(n) {
   const lv = levelByN(n);
   if (!lv) { location.hash = "#/"; return; }
   if (!certificateUnlocked(me.rec, lv.n)) { location.hash = "#/level/" + lv.n; return; }
+  /* بوابة المعلومات الدراسية (مواصفة المالك 2026-10-31): الشهادة لا
+     تُصدر بفراغات — من أكمل المستوى ونقصه مستواه الدراسي أو مؤسسته
+     (معلومات تكميلية قد تُركت فارغة عند إنشاء الحساب) يرى تنبيهًا
+     ودودًا وزرًّا إلى ملفه الشخصي بدل صفحة شهادة ناقصة */
+  if (!me.rec.level || !me.rec.school) {
+    shell(
+      '<p class="crumbs"><a href="#/level/' + lv.n + '">→ عودة إلى المستوى ' + lv.n + ': ' + esc(lv.title) + '</a></p>' +
+      '<section class="auth-card cert-gate-card">' +
+        '<h1>' + icon("award", "icon-md") + ' شهادتك جاهزة تقريبًا</h1>' +
+        '<p class="muted">أحسنت — أكملت دروس المستوى ' + lv.n + ' وتمرينه البرمجي. لإصدار الشهادة، أكمل معلوماتك الدراسية أولًا: نحتاج <strong>مستواك الدراسي</strong> و<strong>اسم مؤسستك</strong> في ملفك الشخصي، فلا تُطبع الشهادة بمعلومات ناقصة.</p>' +
+        '<p class="muted small">تستغرق أقل من دقيقة، وتُكملها مرة واحدة لكل شهاداتك القادمة.</p>' +
+        '<div class="cert-gate-actions">' +
+          '<a class="btn btn-primary" href="#/profile">' + icon("user", "icon-sm") + '<span>إكمال معلوماتي في الملف الشخصي</span></a>' +
+          '<a class="btn btn-ghost" href="#/level/' + lv.n + '">عودة إلى المستوى</a>' +
+        '</div>' +
+      '</section>', "شهادة إتمام المستوى " + lv.n
+    );
+    return;
+  }
   /* تاريخ الشهادة هو تاريخ إتمام المستوى المحفوظ، لا تاريخ يوم الطباعة
      (عند غيابه في سجلات قديمة نعرض تاريخ اليوم) */
   const doneTs = me.rec.levelDates && me.rec.levelDates[lv.n];
@@ -1576,256 +1976,6 @@ function renderCertificate(n) {
       '<a class="btn btn-ghost" href="#/level/' + lv.n + '">عودة إلى المستوى</a></div>', "شهادة إتمام المستوى " + lv.n
   );
   $("#btn-print-cert").addEventListener("click", () => window.print());
-}
-
-/* ---------- لوحة الأستاذ #/teacher — الجولة الثالثة ----------
-   تجميع عرضي بحت: ملفات النسخ تُقرأ إلى ذاكرة الصفحة (teacherData) وتُبنى
-   منها صفوف الجدول؛ لا كتابة إطلاقًا في قاعدة بيانات هذا الحاسوب، فلا
-   يتأثر حساب أي تلميذ محلي باستيراد اللوحة. تُنسى البيانات بإعادة التحميل */
-let teacherData = { users: {}, messages: [] };
-/* حالة عرض اللوحة (بحث/مرشّحات/فرز) — تعيش في ذاكرة الصفحة فقط */
-let teacherView = { q: "", level: "", school: "", sort: "progress-desc" };
-/* مصدر اللوحة الموحّد (المرحلة الثانية): حسابات قاعدة بيانات هذا
-   الحاسوب نفسه + ما استورده الأستاذ من نسخ التلاميذ في هذه الجلسة.
-   عند تعارض مفتاح، تتقدّم نسخة التلميذ المستوردة لأنها لقطة أحدث من
-   جهازه. العرض للقراءة فقط — اللوحة لا تكتب في قاعدة البيانات أبدًا */
-function teacherAllUsers() {
-  const merged = {};
-  const local = loadDB().users || {};
-  for (const k of Object.keys(local)) merged[k] = local[k];
-  for (const k of Object.keys(teacherData.users)) merged[k] = teacherData.users[k];
-  return merged;
-}
-function fmtStamp(ts) {
-  if (!ts) return "—";
-  const d = new Date(ts);
-  return d.getFullYear() + "/" + pad2(d.getMonth() + 1) + "/" + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
-}
-function teacherFilteredRows(rows) {
-  const q = teacherView.q.trim().toLowerCase();
-  let out = rows.filter(r => {
-    if (q && (r.name || "").toLowerCase().indexOf(q) < 0 && (r.email || "").toLowerCase().indexOf(q) < 0) return false;
-    if (teacherView.level && r.schoolLevel !== teacherView.level) return false;
-    if (teacherView.school && r.school !== teacherView.school) return false;
-    return true;
-  });
-  if (teacherView.sort === "progress-asc") out.sort((a, b) => a.overallPct - b.overallPct);
-  else if (teacherView.sort === "name") out.sort((a, b) => String(a.name).localeCompare(String(b.name), "ar"));
-  else out.sort((a, b) => b.overallPct - a.overallPct);
-  return out;
-}
-function renderTeacher() {
-  const allRows = buildTeacherRows(teacherAllUsers());
-  const keyOn = teacherKeyConfigured(loadDB());
-  const meanPct = allRows.length ? Math.round(allRows.reduce((s, r) => s + r.overallPct, 0) / allRows.length) : 0;
-  const totalCerts = allRows.reduce((s, r) => s + r.certificates, 0);
-  const schools = Array.from(new Set(allRows.map(r => r.school).filter(Boolean))).sort();
-  shell(
-    '<p class="crumbs"><a href="#/">الرئيسية</a> ← لوحة الأستاذ</p>' +
-    '<h1 class="page-title">' + icon("board", "icon-lg") + '<span>مركز الأستاذ — لوحة التتبع</span></h1>' +
-    '<section class="dash-strip teacher-stats">' +
-      '<div class="dash-item"><span class="dash-value" id="teacher-stat-students">' + allRows.length + '</span><span class="dash-label">تلميذ مسجّل</span></div>' +
-      '<div class="dash-item"><span class="dash-value" id="teacher-stat-mean">' + meanPct + '%</span><span class="dash-label">متوسط التقدّم العام</span></div>' +
-      '<div class="dash-item"><span class="dash-value" id="teacher-stat-certs">' + totalCerts + '</span><span class="dash-label">شهادة مستوى محقّقة</span></div>' +
-      '<div class="dash-item grow"><span class="dash-label">المصدر: حسابات هذا الحاسوب + النسخ الاحتياطية المستوردة في هذه الجلسة. اضغط «عرض قاعدة بيانات التلميذ» أمام أي تلميذ لرؤية سجلّه الكامل درسًا بدرس.</span></div>' +
-    '</section>' +
-    '<section class="card"><h2>' + icon("upload", "icon-md") + '<span>استيراد نسخ التلاميذ الاحتياطية</span></h2>' +
-      '<p class="muted">اسحب ملفات النسخ الاحتياطية (JSON) التي صدّرها تلاميذك من منصاتهم وأفلتها في منطقة الإفلات، أو اخترها بالزر — يقبل عدة ملفات دفعة واحدة. كل ملف يُفحص بمدقّق النسخ نفسه، والملف غير الصالح يُرفض برسالة خاصّة به دون أن يوقف البقية.</p>' +
-      '<p class="muted"><strong>تنبيه مهم:</strong> الاستيراد هنا للعرض والتتبّع فقط — لا يغيّر حسابات هذا الحاسوب ولا تقدّم أي تلميذ فيه إطلاقًا. الدمج الفعلي في حسابات هذا الحاسوب يكون من بطاقة النسخة الاحتياطية في الصفحة الرئيسية وباختيارك الصريح هناك.</p>' +
-      '<p class="muted small">«النقاط» هي مجموع أفضل نتائج الاختبارات (quizBest) كما هي مخزّنة فعلًا في سجلات التلاميذ. الدرس يُحسب منجزًا باجتياز اختباره فقط (قاعدة المنصة)، والشهادة تُحتسب عند إتمام دروس المستوى وتمرين ملعب الكود معًا.</p>' +
-      '<div class="drop-zone" id="teacher-drop">' +
-        '<p class="drop-zone-text">' + icon("upload", "icon-lg") + '<span>أفلت ملفات النسخ الاحتياطية هنا</span></p>' +
-        '<label class="btn btn-primary">اختيار ملفات النسخ الاحتياطية<input id="teacher-files" type="file" accept="application/json,.json" multiple hidden></label>' +
-      '</div>' +
-      '<div id="teacher-msgs">' + teacherData.messages.map(m =>
-        '<p class="quiz-result ' + (m.ok ? "ok" : "warn") + '" role="status">' + esc(m.text) + '</p>').join("") + '</div>' +
-    '</section>' +
-    '<section class="card"><h2>تلاميذ المنصة — بحث وترتيب</h2>' +
-      '<div class="teacher-controls">' +
-        '<label>بحث بالاسم أو البريد<input id="teacher-search" type="search" placeholder="مثال: يوسف أو @example" value="' + esc(teacherView.q) + '"></label>' +
-        '<label>المستوى الدراسي<select id="teacher-filter-level">' +
-          '<option value="">كل المستويات</option>' +
-          SCHOOL_LEVELS.map(lv => '<option value="' + esc(lv) + '"' + (teacherView.level === lv ? " selected" : "") + '>' + esc(lv) + '</option>').join("") +
-        '</select></label>' +
-        '<label>المؤسسة<select id="teacher-filter-school">' +
-          '<option value="">كل المؤسسات</option>' +
-          schools.map(s => '<option value="' + esc(s) + '"' + (teacherView.school === s ? " selected" : "") + '>' + esc(s) + '</option>').join("") +
-        '</select></label>' +
-        '<label>الترتيب<select id="teacher-sort">' +
-          '<option value="progress-desc"' + (teacherView.sort === "progress-desc" ? " selected" : "") + '>التقدّم: من الأعلى</option>' +
-          '<option value="progress-asc"' + (teacherView.sort === "progress-asc" ? " selected" : "") + '>التقدّم: من الأدنى</option>' +
-          '<option value="name"' + (teacherView.sort === "name" ? " selected" : "") + '>الاسم</option>' +
-        '</select></label>' +
-      '</div>' +
-      '<div id="teacher-table-zone"></div>' +
-      '<div class="backup-actions"><button class="btn btn-primary" id="btn-teacher-csv" type="button">تصدير جدول القسم كاملًا CSV (يفتحه Excel)</button></div>' +
-    '</section>' +
-    '<section class="card"><h2>' + icon("key", "icon-md") + '<span>مفتاح الأستاذ لاستعادة الحسابات</span></h2>' +
-      (keyOn
-        ? '<p class="muted">يوجد مفتاح أستاذ مهيأ على هذا الحاسوب: صفحة الاستعادة (#/recover) تطلب رفع ملف المفتاح (.academykey) قبل أي إعادة تعيين. إن ضاع الملف من USB، أنشئ مفتاحًا جديدًا من هنا — وسيبطل القديم فورًا.</p>'
-        : '<p class="muted">لا يوجد مفتاح أستاذ مهيأ بعد على هذا الحاسوب: الاستعادة في #/recover تعمل بنمط الحضور المشرف فقط. أنشئ ملف المفتاح واحتفظ به في ذاكرة USB الخاصة بك وحدك.</p>') +
-      '<div class="backup-actions"><button class="btn btn-ghost" id="btn-make-key2" type="button">' + (keyOn ? "إنشاء مفتاح جديد (يبطل القديم)" : "إنشاء ملف مفتاح الأستاذ") + '</button></div>' +
-      '<p class="muted small" id="key-msg2" role="status" aria-live="polite"></p>' +
-      '<p class="muted small">صراحة تقنية: تُحفظ بصمة SHA-256 لسرّ المفتاح في متصفح هذا الحاسوب والتحقق محلي بالكامل — رادع وفحص حيازة ملف، لا حماية بمستوى الخوادم.</p>' +
-    '</section>', "لوحة الأستاذ"
-  );
-  const absorbFiles = (files) => {
-    const list = Array.from(files || []);
-    if (!list.length) return;
-    teacherData.messages = [];
-    let pending = list.length;
-    const done = () => { pending--; if (pending === 0) renderTeacher(); };
-    list.forEach(f => {
-      if (typeof FileReader === "undefined") {
-        teacherData.messages.push({ ok: false, text: "✗ " + f.name + ": هذا المتصفح لا يدعم قراءة الملفات." });
-        return done();
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        let obj = null;
-        try { obj = JSON.parse(String(reader.result)); } catch (e) { obj = null; }
-        if (!obj) { teacherData.messages.push({ ok: false, text: "✗ " + f.name + ": تعذّرت قراءة الملف — تأكد أنه ملف نسخة احتياطية JSON صادر من المنصة." }); return done(); }
-        const v = validateBackup(obj);
-        if (!v.ok) { teacherData.messages.push({ ok: false, text: "✗ " + f.name + ": " + v.error }); return done(); }
-        let n = 0;
-        for (const name of Object.keys(v.users)) { teacherData.users[name] = v.users[name]; n++; }
-        teacherData.messages.push({ ok: true, text: "✓ " + f.name + ": أُضيف/حُدّث " + n + " تلميذًا في جدول اللوحة — دون لمس حسابات هذا الحاسوب." });
-        done();
-      };
-      reader.onerror = () => { teacherData.messages.push({ ok: false, text: "✗ " + f.name + ": تعذّرت قراءة هذا الملف." }); done(); };
-      reader.readAsText(f);
-    });
-  };
-  const fi = $("#teacher-files");
-  if (fi) fi.addEventListener("change", () => absorbFiles(fi.files));
-  const dz = $("#teacher-drop");
-  if (dz) {
-    dz.addEventListener("dragover", (e) => { e.preventDefault(); dz.classList.add("drag-over"); });
-    dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
-    dz.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dz.classList.remove("drag-over");
-      absorbFiles(e.dataTransfer && e.dataTransfer.files);
-    });
-  }
-  renderTeacherTable();
-  const searchInp = $("#teacher-search");
-  if (searchInp) searchInp.addEventListener("input", () => { teacherView.q = searchInp.value; renderTeacherTable(); });
-  const lvlSel = $("#teacher-filter-level");
-  if (lvlSel) lvlSel.addEventListener("change", () => { teacherView.level = lvlSel.value; renderTeacherTable(); });
-  const schSel = $("#teacher-filter-school");
-  if (schSel) schSel.addEventListener("change", () => { teacherView.school = schSel.value; renderTeacherTable(); });
-  const sortSel = $("#teacher-sort");
-  if (sortSel) sortSel.addEventListener("change", () => { teacherView.sort = sortSel.value; renderTeacherTable(); });
-  const csvBtn = $("#btn-teacher-csv");
-  if (csvBtn) csvBtn.addEventListener("click", () => {
-    downloadFile("class-results.csv", teacherRowsToCSV(buildTeacherRows(teacherAllUsers())), "text/csv;charset=utf-8");
-  });
-  const keyBtn2 = $("#btn-make-key2");
-  if (keyBtn2) keyBtn2.addEventListener("click", async () => {
-    keyBtn2.disabled = true;
-    const km = $("#key-msg2");
-    const keyObj = await createTeacherKey();
-    if (!keyObj) { if (km) km.textContent = "تعذّر حفظ بصمة المفتاح على هذا الحاسوب (التخزين ممتلئ أو محظور)."; keyBtn2.disabled = false; return; }
-    downloadFile("academy-teacher-key.academykey", JSON.stringify(keyObj, null, 2), "application/json");
-    if (km) km.textContent = "أُنشئ ملف المفتاح ونُزّل: انقله إلى ذاكرة USB الخاصة بك واحذفه من هذا الحاسوب. الاستعادة ستطلبه من الآن فصاعدًا.";
-    setTimeout(() => renderTeacher(), 1600);
-  });
-}
-
-/* جدول اللوحة وحده يُعاد رسمه عند كل بحث/ترشيح/فرز — بقية الصفحة ثابتة */
-function renderTeacherTable() {
-  if (typeof document.getElementById !== "function") return;
-  const zone = document.getElementById("teacher-table-zone");
-  if (!zone) return;
-  const all = buildTeacherRows(teacherAllUsers());
-  const rows = teacherFilteredRows(all);
-  if (!all.length) {
-    zone.innerHTML = '<p class="muted">لا تلاميذ بعد — لا حسابات على هذا الحاسوب ولا نسخ مستوردة. استورد أول نسخة احتياطية لتلميذ أو دعه ينشئ حسابه على هذا الحاسوب.</p>';
-    return;
-  }
-  if (!rows.length) {
-    zone.innerHTML = '<p class="muted">لا نتائج مطابقة لبحثك ومرشّحاتك الحالية — جرّب كلمة أخرى أو أعد ضبط المرشّحات.</p>';
-    return;
-  }
-  zone.innerHTML =
-    '<p class="muted small">يظهر ' + rows.length + ' من أصل ' + all.length + ' تلميذًا حسب البحث والمرشّحات.</p>' +
-    '<div class="table-wrap"><table class="class-table"><thead><tr>' +
-    '<th>التلميذ</th><th>الحساب</th><th>التقدّم</th><th>حسب المستويات</th><th>الشهادات</th><th>آخر نشاط</th><th></th>' +
-    '</tr></thead><tbody>' +
-    rows.map(r => '<tr>' +
-      '<td><strong>' + esc(r.name) + '</strong>' +
-        (r.email ? '<br><span class="muted small" dir="ltr">' + esc(r.email) + '</span>'
-                 : '<br><span class="muted small" dir="ltr">' + esc(r.username) + '</span>') +
-        ((r.age !== null && r.age !== undefined) || r.schoolLevel || r.school
-          ? '<br><span class="muted small">' +
-            [(r.age !== null && r.age !== undefined) ? "السن: " + r.age : "", r.schoolLevel || "", r.school || ""]
-              .filter(Boolean).map(esc).join(" · ") + '</span>' : '') +
-      '</td>' +
-      '<td><span class="provider-badge">' + (r.provider === "google" ? "Google" : "استمارة") + '</span><br>' +
-        '<span class="muted small">' + (r.allComplete ? icon("award", "icon-sm") + " أكمل كل المستويات" : "المستوى الحالي " + r.currentLevel) + '</span></td>' +
-      '<td><strong>' + r.doneCount + ' / ' + r.totalLessons + '</strong> درسًا<br>' +
-        '<span class="muted small">التقدّم العام ' + r.overallPct + '% · النقاط ' + r.earned + (r.possible ? ' / ' + r.possible : '') + '</span></td>' +
-      '<td class="small">' + r.perLevel.map(p => 'م' + p.n + ': ' + p.done + '/' + p.total).join(' · ') + '</td>' +
-      '<td>' + (r.certificates ? '<span class="inline-icon-badge">' + icon("award", "icon-sm") + '<span>× ' + r.certificates + '</span></span>' : '—') + '</td>' +
-      '<td class="small"><span dir="ltr">' + fmtStamp(r.updatedAt) + '</span></td>' +
-      '<td><a class="btn btn-ghost btn-small" href="#/teacher/student/' + encodeURIComponent(r.username) + '">عرض قاعدة بيانات التلميذ</a></td>' +
-    '</tr>').join("") +
-    '</tbody></table></div>';
-}
-/* صفحة تلميذ بعينه: «قاعدة البيانات الخاصة بكل تلميذ» مقروءة كاملة —
-   بياناته وتقدّمه درسًا بدرس مع أفضل نتيجة لكل اختبار وحالة الملعب
-   والشهادة لكل مستوى. قراءة فقط، من المصدر الموحّد نفسه */
-function renderTeacherStudent(key) {
-  const users = teacherAllUsers();
-  const rec = Object.prototype.hasOwnProperty.call(users, key) ? users[key] : null;
-  if (!rec) {
-    shell('<p class="crumbs"><a href="#/teacher">→ عودة إلى لوحة الأستاذ</a></p>' +
-      '<section class="card"><h1 class="page-title">تلميذ غير موجود</h1>' +
-      '<p class="muted">لا يوجد سجل بهذا المعرّف في حسابات هذا الحاسوب ولا في النسخ المستوردة في هذه الجلسة.</p></section>', "لوحة الأستاذ");
-    return;
-  }
-  const rows = buildTeacherRows(users);
-  const row = rows.find(r => r.username === key) || {};
-  const levelsHtml = DATA.levels.map(lv => {
-    const lessons = DATA.lessons.filter(l => l.level === lv.n);
-    const st = levelStats(rec, lv.n);
-    const pg = !!(rec.playgroundPassed && rec.playgroundPassed[lv.n]);
-    const cert = certificateUnlocked(rec, lv.n);
-    const doneDate = rec.levelDates && rec.levelDates[lv.n] ? fmtStamp(rec.levelDates[lv.n]) : null;
-    return '<section class="card student-level"><h2>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h2>' +
-      '<p class="muted">دروس منجزة: <strong>' + st.done + ' / ' + st.total + '</strong> · ' +
-      'تمرين ملعب الكود: <strong>' + (pg ? "تم بنجاح ✓" : "لم يُنجز بعد") + '</strong> · ' +
-      'الشهادة: <strong>' + (cert ? icon("award", "icon-sm") + " محقّقة" : "مقفلة") + '</strong>' +
-      (doneDate ? ' · تاريخ إتمام الدروس: <span dir="ltr">' + doneDate + '</span>' : '') + '</p>' +
-      '<div class="table-wrap"><table class="class-table"><thead><tr><th>الدرس</th><th>الحالة</th><th>أفضل نتيجة في الاختبار</th></tr></thead><tbody>' +
-      lessons.map(l => {
-        const p = rec.progress && rec.progress[l.id];
-        const passed = isPassed(p, l);
-        const best = p && typeof p.quizBest === "number" && p.quizTotal ? p.quizBest + ' / ' + p.quizTotal : '—';
-        return '<tr class="lesson-status-row"><td>' + l.num + '. ' + esc(l.title) + '</td>' +
-          '<td>' + (passed ? '<span class="status-ok">' + icon("check-circle", "icon-sm") + '<span>منجز (اجتاز الاختبار)</span></span>' : "لم يُنجز بعد") + '</td>' +
-          '<td>' + best + '</td></tr>';
-      }).join("") +
-      '</tbody></table></div></section>';
-  }).join("");
-  shell(
-    '<p class="crumbs"><a href="#/teacher">→ عودة إلى لوحة الأستاذ</a></p>' +
-    '<h1 class="page-title">' + icon("folder", "icon-lg") + '<span>قاعدة بيانات التلميذ: ' + esc(rec.name || key) + '</span></h1>' +
-    '<section class="card student-info"><h2>بيانات الحساب</h2>' +
-      '<div class="table-wrap"><table class="class-table"><tbody>' +
-      '<tr><th>الاسم الكامل</th><td>' + esc(rec.name || key) + '</td></tr>' +
-      '<tr><th>البريد الإلكتروني</th><td>' + (rec.email ? '<span dir="ltr">' + esc(rec.email) + '</span>' : '— (حساب قديم بلا بريد)') + '</td></tr>' +
-      '<tr><th>السنّ</th><td>' + ((typeof rec.age === "number") ? rec.age : '—') + '</td></tr>' +
-      '<tr><th>المستوى الدراسي</th><td>' + esc(rec.level || '—') + '</td></tr>' +
-      '<tr><th>المؤسسة</th><td>' + esc(rec.school || '—') + '</td></tr>' +
-      '<tr><th>نوع الحساب</th><td>' + (accountProvider(rec) === "google" ? "حساب Google" : "حساب بالاستمارة وكلمة سر") + '</td></tr>' +
-      '<tr><th>أُنشئ في</th><td><span dir="ltr">' + fmtStamp(row.createdAt) + '</span></td></tr>' +
-      '<tr><th>آخر نشاط</th><td><span dir="ltr">' + fmtStamp(row.updatedAt) + '</span></td></tr>' +
-      '<tr><th>التقدّم العام</th><td><strong>' + (row.doneCount || 0) + ' / ' + TOTAL_LESSONS + ' درسًا (' + (row.overallPct || 0) + '%)</strong> · الشهادات المحقّقة: ' + (row.certificates || 0) + '</td></tr>' +
-      '</tbody></table></div>' +
-    '</section>' + levelsHtml, "قاعدة بيانات التلميذ"
-  );
 }
 
 /* ---------- تجربة الوميض التفاعلية (الدرس المرجعي) ---------- */
@@ -2345,25 +2495,19 @@ function render() {
   stopExperiment();
   const hash = location.hash || "#/";
   const parts = hash.replace(/^#\//, "").split("/");
-  /* لوحة الأستاذ متاحة للمسجّل والزائر معًا (حاسوب القسم)، ولها صفحة
-     فرعية لسجلّ كل تلميذ */
-  const teacherRoute = () => {
-    if (parts[1] === "student" && parts[2]) {
-      try { return renderTeacherStudent(decodeURIComponent(parts.slice(2).join("/"))); }
-      catch (e) { return renderTeacherStudent(parts.slice(2).join("/")); }
-    }
-    return renderTeacher();
-  };
+  /* شاشة تعيين كلمة السر تقع بين دخول Google ودخول المنصة: تُعرض قبل
+     بوابة الجلسة لأن صاحبها لم يدخل بعدُ، وهي نفسها تحسم حالاتها
+     (لا حساب منتظر → الدخول؛ كلمة سر معيّنة → دخول عادي) */
+  if (parts[0] === "set-password") return renderSetPassword();
   if (!currentUser()) {
     if (parts[0] === "login") return renderAuth("login");
     if (parts[0] === "register") return renderAuth("register");
     if (parts[0] === "recover") return renderRecover();
-    if (parts[0] === "teacher") return teacherRoute();
     /* الجذر وأي مسار آخر لزائر غير مسجّل: صفحة الاستقبال الاحترافية،
        لا قفز مباشر إلى استمارة الدخول (طلب المالك 2026-10-31) */
     return renderLanding();
   }
-  if (parts[0] === "teacher") return teacherRoute();
+  if (parts[0] === "profile") return renderProfile();
   if (parts[0] === "level" && parts[1]) return renderLevel(Number(parts[1]));
   if (parts[0] === "certificate" && parts[1]) return renderCertificate(Number(parts[1]));
   if (parts[0] === "lesson" && parts[1]) return renderLesson(parts[1]);

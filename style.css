@@ -317,6 +317,50 @@ p:last-child {
 .user-name .icon {
   color: var(--color-muted);
 }
+/* أيقونة حساب التلميذ في الترويسة + وجوه الحساب (صورة أو حرف أول) */
+.account-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  text-decoration: none;
+  transition: var(--transition-control);
+}
+.account-chip:hover {
+  box-shadow: 0 0 0 3px var(--border-hover-cyan);
+}
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex: none;
+  object-fit: cover;
+}
+.avatar-letter {
+  background-color: var(--color-navy-600);
+  color: var(--color-white);
+  border: 2px solid var(--color-cyan);
+  font-weight: 800;
+  font-size: var(--text-base);
+  line-height: 1;
+}
+.avatar-img {
+  border: 2px solid var(--color-cyan);
+  background-color: var(--color-bg);
+}
+.avatar-lg {
+  width: 52px;
+  height: 52px;
+  font-size: 1.35rem;
+}
+.avatar-xl {
+  width: 84px;
+  height: 84px;
+  font-size: 2rem;
+}
 
 /* ---------- نظام الأزرار الكامل (Full State System + Compact Rhythm) ---------- */
 .btn,
@@ -1349,6 +1393,81 @@ p:last-child {
   margin-top: var(--space-1);
   color: var(--color-muted);
 }
+/* عناوين أقسام الاستمارات (أساسية / تكميلية / تغيير كلمة السر) */
+.auth-section-title {
+  margin: var(--space-6) 0 var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  color: var(--color-navy-700);
+  font-size: var(--text-base);
+  font-weight: 800;
+}
+.auth-card form .auth-section-title:first-child {
+  margin-top: var(--space-2);
+  padding-top: 0;
+  border-top: none;
+}
+.auth-card input[disabled] {
+  background-color: var(--color-bg);
+  color: var(--color-muted);
+  cursor: not-allowed;
+}
+/* شاشة تعيين كلمة السر: هوية صاحب الحساب للقراءة فقط */
+.setpw-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.setpw-name {
+  margin: 0;
+  font-weight: 800;
+  color: var(--color-navy-700);
+}
+.setpw-email {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  text-align: right;
+}
+/* الملف الشخصي: كتلة الصورة وأزرارها */
+.profile-card {
+  max-width: 560px;
+}
+.profile-photo-block {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.profile-photo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.profile-upload-btn {
+  cursor: pointer;
+  margin: 0;
+}
+/* بوابة الشهادة عند نقص المعلومات الدراسية */
+.cert-gate-card {
+  text-align: right;
+}
+.cert-gate-card h1 .icon {
+  color: var(--color-cyan-dark);
+  vertical-align: -4px;
+}
+.cert-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
 .btn-google {
   display: flex;
   align-items: center;
@@ -1981,103 +2100,7 @@ p:last-child {
   margin-inline-end: var(--space-1);
 }
 
-/* ---------- مركز الأستاذ والجداول والمزامنة ---------- */
-.table-wrap {
-  overflow-x: auto;
-}
-.class-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--text-sm);
-}
-.class-table th,
-.class-table td {
-  border: 1px solid var(--color-line);
-  padding: var(--space-2) var(--space-3);
-  text-align: right;
-  vertical-align: top;
-}
-.class-table thead th {
-  background-color: var(--color-navy-700);
-  color: var(--color-white);
-  font-weight: 700;
-}
-.class-table tbody tr:nth-child(even) {
-  background-color: var(--color-bg);
-}
-.drop-zone {
-  border: 1px dashed var(--color-cyan-dark);
-  border-radius: var(--radius-card);
-  background-color: var(--color-bg);
-  padding: var(--space-6);
-  text-align: center;
-  margin: var(--space-4) 0;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-.drop-zone.drag-over {
-  background-color: var(--color-cyan-soft);
-  border-color: var(--color-navy-700);
-}
-.drop-zone-text {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  font-size: var(--text-md);
-  font-weight: 700;
-  color: var(--color-navy-700);
-  margin: 0 0 var(--space-3);
-}
-.drop-zone-text .icon {
-  color: var(--color-navy-700);
-}
-.teacher-controls {
-  display: flex;
-  gap: var(--space-4);
-  flex-wrap: wrap;
-  margin-bottom: var(--space-4);
-}
-.teacher-controls label {
-  display: block;
-  font-size: var(--text-sm);
-  font-weight: 700;
-  color: var(--color-navy-700);
-  flex: 1 1 180px;
-}
-.teacher-controls input,
-.teacher-controls select {
-  display: block;
-  width: 100%;
-  margin-top: var(--space-1);
-  padding: 8px 12px;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  font-size: var(--text-sm);
-  font-family: inherit;
-  background-color: var(--color-white);
-  color: var(--color-ink);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-.teacher-controls input:focus,
-.teacher-controls select:focus {
-  outline: none;
-  border-color: var(--color-cyan-dark);
-  box-shadow: 0 0 0 3px rgba(11, 110, 140, 0.16);
-}
-.provider-badge {
-  display: inline-block;
-  background-color: var(--color-bg);
-  color: var(--color-navy-700);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-control);
-  padding: 1px 8px;
-  font-size: var(--text-2xs);
-  font-weight: 700;
-}
-.student-info th {
-  text-align: start;
-  width: 180px;
-}
+/* ---------- المزامنة السحابية ---------- */
 .sync-overlay {
   position: fixed;
   inset: 0;

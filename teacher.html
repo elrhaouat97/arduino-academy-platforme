@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>منصة الأستاذ — أكاديمية الروبوتيك والذكاء الاصطناعي</title>
+<link rel="icon" href="assets/club-logo.jpg">
+<link rel="stylesheet" href="teacher.css">
+</head>
+<body>
+<!-- ============================================================
+     منصة الأستاذ المستقلة (قرار المالك 2026-10-31): صفحة قائمة
+     بذاتها بدخول خاص وقاعدة بيانات محلية خاصة بها
+     (teacherPlatformDB.v1) — لا رابط إليها من منصة التلاميذ،
+     وتستورد النسخ الاحتياطية التي يصدّرها التلاميذ من منصتهم.
+     ============================================================ -->
+
+<!-- ---------- شاشة الدخول ---------- -->
+<div id="login-view" class="login-view" hidden>
+  <form class="login-card" id="login-form" autocomplete="off">
+    <img class="login-logo" src="assets/club-logo.jpg" alt="شعار نادي الروبوتيك والذكاء الاصطناعي">
+    <h1>منصة الأستاذ</h1>
+    <p class="login-sub">أكاديمية الروبوتيك والذكاء الاصطناعي — لوحة تتبّع وإدارة خاصة بالأستاذ وحده</p>
+    <label>اسم المستخدم
+      <input id="login-user" type="text" required autocomplete="username" dir="ltr">
+    </label>
+    <label>كلمة السر
+      <input id="login-pass" type="password" required autocomplete="current-password" dir="ltr">
+    </label>
+    <p class="form-error" id="login-error" role="alert" hidden></p>
+    <button class="btn btn-primary btn-wide" type="submit">دخول</button>
+    <p class="login-note">هذه المنصة مستقلة تمامًا عن منصة التلاميذ: بياناتها تعيش في هذا المتصفح فقط، ولا يدخلها إلا الأستاذ.</p>
+  </form>
+</div>
+
+<!-- ---------- هيكل المنصة ---------- -->
+<div id="teacher-app" class="t-layout" hidden>
+  <aside class="t-sidebar">
+    <div class="t-brand">
+      <img class="t-brand-logo" src="assets/club-logo.jpg" alt="شعار نادي الروبوتيك والذكاء الاصطناعي">
+      <div class="t-brand-text">
+        <span class="t-brand-name">منصة الأستاذ</span>
+        <span class="t-brand-sub">أكاديمية الروبوتيك والذكاء الاصطناعي</span>
+      </div>
+    </div>
+    <nav class="t-nav" aria-label="أقسام منصة الأستاذ">
+      <button class="t-nav-item" type="button" data-nav="dashboard"><span class="t-nav-ico" data-ico="grid"></span><span>لوحة القيادة</span></button>
+      <button class="t-nav-item" type="button" data-nav="preview"><span class="t-nav-ico" data-ico="eye"></span><span>المعاينة</span></button>
+      <button class="t-nav-item" type="button" data-nav="paths"><span class="t-nav-ico" data-ico="route"></span><span>تتبع المسارات</span></button>
+      <button class="t-nav-item" type="button" data-nav="database"><span class="t-nav-ico" data-ico="db"></span><span>قاعدة البيانات</span></button>
+      <button class="t-nav-item" type="button" data-nav="settings"><span class="t-nav-ico" data-ico="gear"></span><span>الإعدادات</span></button>
+    </nav>
+    <div class="t-sidebar-foot">
+      <span class="t-side-stat" id="side-student-count"></span>
+    </div>
+  </aside>
+
+  <div class="t-main">
+    <header class="t-topbar">
+      <div class="t-topbar-titles">
+        <span class="t-topbar-title">أكاديمية الروبوتيك والذكاء الاصطناعي — منصة الأستاذ</span>
+        <span class="t-topbar-view" id="topbar-view-name"></span>
+      </div>
+      <button class="btn btn-ghost btn-small" id="btn-logout" type="button"><span data-ico="logout"></span><span>تسجيل الخروج</span></button>
+    </header>
+
+    <main class="t-content" id="t-content">
+      <section class="t-view" id="view-dashboard"></section>
+      <section class="t-view" id="view-preview" hidden></section>
+      <section class="t-view" id="view-paths" hidden></section>
+      <section class="t-view" id="view-database" hidden></section>
+      <section class="t-view" id="view-detail" hidden></section>
+      <section class="t-view" id="view-settings" hidden></section>
+    </main>
+  </div>
+</div>
+
+<!-- ---------- نافذة إضافة/تعديل تلميذ ---------- -->
+<div class="t-modal-backdrop" id="student-modal" hidden>
+  <div class="t-modal" role="dialog" aria-modal="true" aria-labelledby="student-modal-title">
+    <h2 id="student-modal-title">إضافة تلميذ</h2>
+    <form id="student-form" autocomplete="off" novalidate>
+      <div class="t-form-grid">
+        <label>الاسم الشخصي<input id="sf-firstname" type="text" required maxlength="40" autocomplete="given-name"></label>
+        <label>الاسم العائلي (النسب)<input id="sf-lastname" type="text" required maxlength="40" autocomplete="family-name"></label>
+      </div>
+      <label>البريد الإلكتروني<input id="sf-email" type="email" required maxlength="80" autocomplete="email" dir="ltr"></label>
+      <div class="t-form-grid">
+        <label>السنّ<input id="sf-age" type="number" min="8" max="25" step="1" inputmode="numeric" dir="ltr" placeholder="اختياري"></label>
+        <label>المستوى الدراسي
+          <select id="sf-level">
+            <option value="">غير محدد (اختياري)</option>
+            <option value="أولى إعدادي">أولى إعدادي</option>
+            <option value="ثانية إعدادي">ثانية إعدادي</option>
+            <option value="ثالثة إعدادي">ثالثة إعدادي</option>
+          </select>
+        </label>
+      </div>
+      <label>اسم المؤسسة<input id="sf-school" type="text" maxlength="80" placeholder="اختياري"></label>
+      <p class="form-error" id="sf-error" role="alert" hidden></p>
+      <div class="t-modal-actions">
+        <button class="btn btn-primary" type="submit" id="sf-submit">حفظ التلميذ</button>
+        <button class="btn btn-ghost" type="button" id="sf-cancel">إلغاء</button>
+      </div>
+      <p class="t-modal-note" id="sf-note">السجل اليدوي يُنشأ بتقدّم فارغ ويُعلَّم بمصدر «إضافة يدوية» — وعند استيراد نسخة التلميذ الاحتياطية لاحقًا يُحدَّث هذا السجل ببياناته الحقيقية.</p>
+    </form>
+  </div>
+</div>
+
+<script src="lessons-data.js"></script>
+<script src="teacher.js"></script>
+<link rel="stylesheet" href="chatbot.css">
+<script src="chatbot.js"></script>
+</body>
+</html>

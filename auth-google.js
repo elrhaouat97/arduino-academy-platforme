@@ -9,7 +9,8 @@
      الاسم والبريد من نقطة userinfo, وdrive.appdata حتى تكفي الموافقة
      نفسها لاحقًا لمزامنة التقدّم دون طلب إذن ثانٍ.
    - المنطق الحسابي (إنشاء الحساب/الدخول/الرسائل) كله في app.js؛
-     هذه الوحدة تنقل ملف Google فقط عبر hooks: onProfile / onError.
+     هذه الوحدة تنقل ملف Google فقط (الاسم والبريد وصورة الحساب)
+     عبر hooks: onProfile / onError.
    - دون إنترنت أو دون معرّف عميل: رسالة عربية واضحة عبر onError،
      ولا يتعطل أي شيء في المنصة — الاستمارة العادية تعمل دائمًا.
    ============================================================ */
@@ -52,7 +53,7 @@ window.AcademyGoogle = (function () {
         var p = pending;
         pending = null;
         if (p && typeof p.onProfile === "function") {
-          p.onProfile({ name: (j && j.name) || "", email: (j && j.email) || "" });
+          p.onProfile({ name: (j && j.name) || "", email: (j && j.email) || "", picture: (j && j.picture) || "" });
         }
       })
       .catch(function () {
