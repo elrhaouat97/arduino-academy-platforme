@@ -7,7 +7,7 @@
    وردّ لبق عند الخروج عن النطاق.
    التكامل: أضف chatbot.css ثم chatbot.js إلى أي صفحة، وسيُنشئ
    الزر والنافذة بنفسه. الإعداد الاختياري:
-     window.ASKBOT_CONFIG = { logoPath: 'assets/club-logo.jpg' }
+     window.ASKBOT_CONFIG = { logoPath: 'assets/club-avatar.png' }
    الواجهة البرمجية: window.AskBot = { open, close, ask }
    ============================================================ */
 (function () {
@@ -708,7 +708,7 @@
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
 
   var CONFIG = window.ASKBOT_CONFIG || {};
-  var LOGO = CONFIG.logoPath || 'assets/club-logo.jpg';
+  var LOGO = CONFIG.logoPath || 'assets/club-avatar.png';
   var DEFAULT_FACTS = { total: 45, levels: 5, c: [10, 11, 11, 8, 5] };
   var WELCOME = 'مرحبًا بك في أكاديمية الروبوتيك والذكاء الاصطناعي.\nأنا «اسألني»، مساعدك داخل المنصة: أجيب عن أسئلتك حول الدروس والمستويات، والتسجيل والحساب، والشهادات، والنادي.\nلا تشارك معلوماتك الشخصية هنا، واسألني ما شئت عن الأكاديمية.';
   var HOME_CHIPS = ['ما هي المسارات المتوفرة؟', 'كم عدد الدروس؟', 'هل الدورة مجانية؟', 'كيف أنشئ حسابًا؟', 'كيف أحصل على الشهادة؟', 'من هو المشرف على الأكاديمية؟'];

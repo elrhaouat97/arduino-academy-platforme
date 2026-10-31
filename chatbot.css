@@ -48,7 +48,7 @@
   border: 2px solid #22C3E6;
   display: inline-flex; align-items: center; justify-content: center;
 }
-.askbot-fab-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.askbot-fab-avatar img { width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; display: block; }
 .askbot-fab-avatar svg { width: 30px; height: 30px; }
 
 .askbot-fab-label {
@@ -145,7 +145,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   flex: 0 0 auto;
 }
-.askbot-head-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.askbot-head-avatar img { width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; display: block; }
 .askbot-head-avatar svg { width: 30px; height: 30px; }
 .askbot-head-text { display: flex; flex-direction: column; line-height: 1.35; flex: 1 1 auto; min-width: 0; }
 .askbot-head-text strong { font-size: 15px; font-weight: 800; }
@@ -191,7 +191,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   flex: 0 0 auto;
 }
-.askbot-msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.askbot-msg-avatar img { width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 2px; box-sizing: border-box; display: block; }
 .askbot-msg-avatar svg { width: 20px; height: 20px; }
 
 .askbot-bubble {
