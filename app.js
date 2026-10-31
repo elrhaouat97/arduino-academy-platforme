@@ -756,17 +756,65 @@ async function startCloudSync() {
   }
 }
 
-/* ---------- شريط الأكاديمية ---------- */
+/* ---------- مجموعة الأيقونات الموحّدة (SVG inline symbols — viewBox 0 0 24 24) ---------- */
+const ICON_SPRITE_MARKUP =
+  '<symbol id="ico-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="3"/><polygon points="10 9 15.5 12 10 15 10 9"/></symbol>' +
+  '<symbol id="ico-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6"/><path d="M10 3v5.4L4.8 17.2A2.5 2.5 0 0 0 7 21h10a2.5 2.5 0 0 0 2.2-3.8L14 8.4V3"/><path d="M6.8 15h10.4"/></symbol>' +
+  '<symbol id="ico-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m8.5 12.2 2.4 2.4 4.8-5"/></symbol>' +
+  '<symbol id="ico-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2.5v3.5M15 2.5v3.5M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/></symbol>' +
+  '<symbol id="ico-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18 14 14 0 0 1 0-18Z"/></symbol>' +
+  '<symbol id="ico-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9.5 12 4.5l9.5 5-9.5 5-9.5-5Z"/><path d="M6.5 12v4.5c0 1.7 2.5 3 5.5 3s5.5-1.3 5.5-3V12"/><path d="M21.5 9.5V15"/></symbol>' +
+  '<symbol id="ico-award" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="m8.8 14.1-1.3 7.4 4.5-2.4 4.5 2.4-1.3-7.4"/></symbol>' +
+  '<symbol id="ico-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.8"/><path d="M4.8 19.5a7.5 7.5 0 0 1 14.4 0"/></symbol>' +
+  '<symbol id="ico-board" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 4.5V3h6v1.5"/><path d="M8.5 10h7M8.5 14h7M8.5 18h4.5"/></symbol>' +
+  '<symbol id="ico-youtube" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="4"/><polygon points="10 9.2 15.2 12 10 14.8 10 9.2"/></symbol>' +
+  '<symbol id="ico-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 3 8l9 4.5L21 8l-9-4.5Z"/><path d="m3 12.5 9 4.5 9-4.5"/><path d="m3 16.8 9 4.5 9-4.5"/></symbol>' +
+  '<symbol id="ico-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.2c-1.8-1.4-4.3-2-7-2A1.5 1.5 0 0 0 3.5 5.7v11.8c0 .8.7 1.5 1.5 1.5 2.7 0 5.2.6 7 2 1.8-1.4 4.3-2 7-2 .8 0 1.5-.7 1.5-1.5V5.7c0-.8-.7-1.5-1.5-1.5-2.7 0-5.2.6-7 2Z"/><path d="M12 6.2v14.8"/></symbol>' +
+  '<symbol id="ico-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m8.5 8.5-4 3.5 4 3.5"/><path d="m15.5 8.5 4 3.5-4 3.5"/><path d="m13.5 5.5-3 13"/></symbol>' +
+  '<symbol id="ico-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6.2v5.3c0 5 3.2 8.3 7.5 9.8 4.3-1.5 7.5-4.8 7.5-9.8V6.2L12 3Z"/><path d="m9 12 2 2 4-4"/></symbol>' +
+  '<symbol id="ico-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m6.5 13.5 5.5 5.5 5.5-5.5"/></symbol>' +
+  '<symbol id="ico-key" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4.2"/><path d="m11 12 8.5-8.5"/><path d="m16 6.5 2.5 2.5M18.5 4 21 6.5"/></symbol>' +
+  '<symbol id="ico-cloud" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 18.5h10.7a4 4 0 0 0 .5-7.96A5.5 5.5 0 0 0 7.3 9.2 4.5 4.5 0 0 0 6.8 18.5Z"/></symbol>' +
+  '<symbol id="ico-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4h9.7L19 6.8V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19V5.5A1.5 1.5 0 0 1 6.5 4Z"/><path d="M8.5 4v5h7V4"/><rect x="8" y="13" width="8" height="7.5" rx="1"/></symbol>' +
+  '<symbol id="ico-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 4h11A1.5 1.5 0 0 1 19 5.5v15l-7-4.2-7 4.2v-15A1.5 1.5 0 0 1 6.5 4Z"/></symbol>' +
+  '<symbol id="ico-printer" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M7 8V4h10v4"/><rect x="4" y="8" width="16" height="8.5" rx="2"/><rect x="7" y="14" width="10" height="6" rx="1"/></symbol>' +
+  '<symbol id="ico-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4.5"/><path d="m7.5 9 4.5-4.5L16.5 9"/><path d="M4 15.5v2.5A2 2 0 0 0 6 20h12a2 2 0 0 0 2-2v-2.5"/></symbol>' +
+  '<symbol id="ico-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6.5A2 2 0 0 1 5.5 4.5h4.2l2 2.2h6.8a2 2 0 0 1 2 2v8.8a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V6.5Z"/></symbol>' +
+  '<symbol id="ico-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1.2"/></symbol>' +
+  '<symbol id="ico-tools" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4.2 4.2 0 0 0-5.4 5.4l-5.3 5.3a1.6 1.6 0 0 0 2.3 2.3l5.3-5.3a4.2 4.2 0 0 0 5.4-5.4l-2.4 2.4-2.3-2.3 2.4-2.4Z"/></symbol>' +
+  '<symbol id="ico-quiz" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="3.5" width="15" height="17" rx="2.5"/><path d="m8 9.2 1.4 1.4 2.6-2.6"/><path d="M14 9.5h2.5"/><path d="m8 14.7 1.4 1.4 2.6-2.6"/><path d="M14 15h2.5"/></symbol>' +
+  '<symbol id="ico-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="M15.8 4.5a2.1 2.1 0 0 1 3 3L8.3 18l-4.3 1 1-4.3L15.8 4.5Z"/><path d="m14 6.3 3 3"/></symbol>' +
+  '<symbol id="ico-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.4 6.1L20.5 12l-6.1 2.4L12 20.5l-2.4-6.1L3.5 12l6.1-2.9L12 3Z"/></symbol>' +
+  '<symbol id="ico-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.8"/><path d="M12 7.5V12l3.2 2"/></symbol>';
+
+function ensureIconSprite() {
+  if (typeof document === "undefined" || !document.body) return;
+  if (typeof document.getElementById === "function" && document.getElementById("academy-icon-sprite")) return;
+  if (typeof document.createElement !== "function") return;
+  const wrap = document.createElement("div");
+  wrap.innerHTML = '<svg id="academy-icon-sprite" class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' + ICON_SPRITE_MARKUP + '</svg>';
+  if (wrap.firstChild) document.body.insertBefore(wrap.firstChild, document.body.firstChild);
+}
+function icon(name, cls) {
+  return '<svg class="icon' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><use href="#ico-' + name + '"></use></svg>';
+}
+
+/* ---------- ترويسة وتذييل الأكاديمية ---------- */
 function headerHTML() {
   const me = currentUser();
-  /* زائر غير مسجّل: الشريط العلوي يعرض زري الدخول/التسجيل دائمًا
-     (صفحة الاستقبال الاحترافية — الجولة الرابعة، المرحلة الثانية) */
+  /* زائر غير مسجّل: الشريط العلوي الأبيض النظيف يعرض رابط مركز الأستاذ وزري الدخول/التسجيل دائمًا */
   const userBox = me
-    ? '<div class="user-box"><span class="user-name">👋 ' + esc(me.rec.name) + '</span>' +
-      '<button class="btn btn-ghost btn-small" id="btn-logout" type="button">تسجيل الخروج</button></div>'
+    ? '<div class="user-box">' +
+        '<a class="header-nav-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a>' +
+        '<span class="user-name">' + icon("user", "icon-sm") + '<span>' + esc(me.rec.name) + '</span></span>' +
+        '<button class="btn btn-ghost btn-small" id="btn-logout" type="button">تسجيل الخروج</button>' +
+      '</div>'
     : '<div class="user-box">' +
-      '<a class="btn-textlink" href="#/login">تسجيل الدخول</a> ' +
-      '<a class="btn btn-primary btn-small btn-signup" href="#/register">سجّل مجانًا</a></div>';
+        '<a class="header-nav-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a>' +
+        '<span class="header-sep" aria-hidden="true"></span>' +
+        '<a class="btn-textlink" href="#/login">تسجيل الدخول</a>' +
+        '<a class="btn btn-primary btn-small btn-signup" href="#/register">سجّل مجانًا</a>' +
+      '</div>';
   return '' +
   '<header class="site-header"><div class="header-inner">' +
     '<a class="brand" href="#/">' +
@@ -774,15 +822,46 @@ function headerHTML() {
       '<span class="brand-text"><span class="brand-name">أكاديمية الروبوتيك والذكاء الاصطناعي</span>' +
       '<span class="brand-sub">Robotics &amp; AI Academy — تعلّم، وصّل، برمج، ابنِ</span></span>' +
     '</a>' + userBox +
-  '</div>' +
-  '<div class="credit-bar">من إعداد الأستاذ محمد الغوات</div></header>';
+  '</div></header>';
 }
 function footerHTML() {
-  return '<footer class="site-footer"><p>أكاديمية الروبوتيك والذكاء الاصطناعي — تعمل بالكامل دون إنترنت. تقدّم كل تلميذ محفوظ على هذا الحاسوب فقط.</p>' +
-    '<p><a href="#/teacher">📋 لوحة الأستاذ — تجميع نتائج القسم</a></p>' +
-    '<p class="footer-credit">من إعداد الأستاذ محمد الغوات</p></footer>';
+  return '' +
+  '<footer class="site-footer">' +
+    '<div class="footer-inner">' +
+      '<div class="footer-grid">' +
+        '<div class="footer-col footer-about">' +
+          '<div class="footer-brand-title">' + icon("cpu", "icon-md") + '<span>أكاديمية الروبوتيك والذكاء الاصطناعي</span></div>' +
+          '<p class="footer-desc">منصة تعليمية عربية مجانية لتعلّم الإلكترونيات والبرمجة والروبوتيك — تعمل بالإنترنت ودون إنترنت، وتقدّم كل تلميذ محفوظ على هذا الحاسوب فقط.</p>' +
+          '<p class="footer-credit">' + icon("cap", "icon-sm") + '<span>من إعداد الأستاذ محمد الغوات — نادي الروبوتيك والذكاء الاصطناعي</span></p>' +
+        '</div>' +
+        '<nav class="footer-col footer-links" aria-label="روابط المنصة">' +
+          '<h3 class="footer-heading">روابط المنصة</h3>' +
+          '<ul class="footer-link-list">' +
+            '<li><a href="#/">الرئيسية</a></li>' +
+            '<li><a href="#/login">تسجيل الدخول</a></li>' +
+            '<li><a href="#/register">إنشاء حساب</a></li>' +
+            '<li><a href="#/teacher">' + icon("board", "icon-sm") + '<span>مركز الأستاذ</span></a></li>' +
+            '<li><a href="privacy.html">' + icon("shield", "icon-sm") + '<span>سياسة الخصوصية</span></a></li>' +
+          '</ul>' +
+        '</nav>' +
+        '<div class="footer-col footer-channel">' +
+          '<h3 class="footer-heading">قناة النادي التعليمية</h3>' +
+          '<p class="footer-channel-note">تابع شروحات الدروس المصوّرة والتطبيقات العملية على قناتنا الرسمية على يوتيوب:</p>' +
+          '<a class="footer-yt-btn" href="https://www.youtube.com/@AiRoboticsClub-o3x" target="_blank" rel="noopener">' +
+            icon("youtube", "icon-md") +
+            '<span>قناة اليوتيوب: Ai &amp; Robotics Club</span>' +
+          '</a>' +
+        '</div>' +
+      '</div>' +
+      '<div class="footer-bottom">' +
+        '<span>أكاديمية الروبوتيك والذكاء الاصطناعي — مجانية بالكامل وبلا إعلانات</span>' +
+        '<span class="footer-bottom-credit">من إعداد الأستاذ محمد الغوات — نادي الروبوتيك والذكاء الاصطناعي</span>' +
+      '</div>' +
+    '</div>' +
+  '</footer>';
 }
 function shell(inner, pageTitle) {
+  ensureIconSprite();
   app().innerHTML = '<a class="skip-link" href="#main">تجاوز إلى المحتوى الرئيسي</a>' + headerHTML() + '<main class="page" id="main" tabindex="-1">' + inner + '</main>' + footerHTML();
   if (pageTitle) document.title = pageTitle + " — أكاديمية الروبوتيك والذكاء الاصطناعي";
   /* رابط التجاوز: ينقل التركيز إلى المحتوى دون تغيير مسار الصفحة */
@@ -827,84 +906,99 @@ function renderLanding() {
     const lvLessons = DATA.lessons.filter(l => l.level === lv.n).sort((a, b) => a.num - b.num);
     const syllabus = lvLessons.map(l => '<li>' + esc(l.title) + '</li>').join("");
     return '<article class="landing-level-card" data-level="' + lv.n + '" tabindex="0" role="link" aria-label="سجّل وابدأ: المستوى ' + lv.n + ' — ' + esc(lv.title) + '">' +
-      '<img class="landing-cover" src="' + levelIconPath(lv.n) + '" alt="">' +
+      '<div class="landing-cover-wrap"><img class="landing-cover" src="' + levelIconPath(lv.n) + '" alt=""></div>' +
       '<div class="landing-card-body">' +
         '<h3>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h3>' +
         '<p class="landing-desc">' + esc(LEVEL_THEMES[lv.n] || lv.title) + '</p>' +
-        '<p class="landing-meta"><span class="landing-count">' + lvLessons.length + ' درسًا</span>' +
-        '<span class="landing-cert">🎓 شهادة إتمام المستوى</span></p>' +
+        '<p class="landing-meta">' +
+          '<span class="landing-count">' + icon("book", "icon-sm") + '<span>' + lvLessons.length + ' درسًا</span></span>' +
+          '<span class="landing-cert">' + icon("cap", "icon-sm") + '<span>شهادة إتمام المستوى</span></span>' +
+        '</p>' +
         '<details class="landing-syllabus"><summary>محتوى المستوى</summary>' +
           '<ol>' + syllabus + '</ol></details>' +
         '<p class="landing-provider">من إعداد الأستاذ محمد الغوات — نادي الروبوتيك والذكاء الاصطناعي</p>' +
       '</div>' +
     '</article>';
   }).join("");
-  const feature = (icon, label) =>
-    '<div class="landing-feature"><span class="landing-feature-icon" aria-hidden="true">' + icon + '</span>' +
+  const feature = (icoName, label) =>
+    '<div class="landing-feature"><span class="landing-feature-icon" aria-hidden="true">' + icon(icoName, "icon-lg") + '</span>' +
     '<span class="landing-feature-label">' + label + '</span></div>';
   /* بطاقات «مسارات الأكاديمية»: مسار الأردوينو وحده حيّ — أعداده مشتقة
      من البيانات (totalLevels/totalLessons أعلاه) لا أرقام مكتوبة باليد —
      والمسارات القادمة بطاقات ساكنة بلا روابط ولا أعداد ولا محتوى مُخترع */
   const arduinoTrackCard =
     '<article class="landing-track-card is-live" data-track="arduino" data-scroll="landing-levels" tabindex="0" role="link" aria-label="مسار الأردوينو والروبوتيك — متاح الآن، انتقل إلى مستوياته">' +
-      '<span class="track-badge track-badge-live">متاح الآن</span>' +
+      '<div class="track-card-top"><span class="track-icon-box">' + icon("cpu", "icon-md") + '</span><span class="track-badge track-badge-live">متاح الآن</span></div>' +
       '<h3>الأردوينو والروبوتيك</h3>' +
       '<p class="landing-track-desc">مسار الأكاديمية الأول والمتاح بكامله: إلكترونيات وبرمجة وروبوتات، من أول دائرة كهربائية إلى مشاريع متقدمة.</p>' +
       '<p class="landing-track-meta"><span data-track-stat="levels">' + totalLevels + '</span> مستويات · <span data-track-stat="lessons">' + totalLessons + '</span> درسًا</p>' +
-      '<span class="landing-track-action">عرض المستويات ↓</span>' +
+      '<span class="landing-track-action"><span>عرض المستويات</span>' + icon("arrow-down", "icon-sm") + '</span>' +
     '</article>';
-  const soonTrackCard = (key, title, line) =>
+  const soonTrackCard = (key, icoName, title, line) =>
     '<article class="landing-track-card is-soon" data-track="' + key + '">' +
-      '<span class="track-badge track-badge-soon">قريبًا</span>' +
+      '<div class="track-card-top"><span class="track-icon-box">' + icon(icoName, "icon-md") + '</span><span class="track-badge track-badge-soon">قريبًا</span></div>' +
       '<h3>' + title + '</h3>' +
       '<p class="landing-track-desc">' + line + '</p>' +
     '</article>';
   const trackCards = arduinoTrackCard +
-    soonTrackCard("python", "لغة Python", "أساسيات البرمجة والتفكير المنطقي بلغة سهلة وواسعة الاستعمال.") +
-    soonTrackCard("web", "صناعة المواقع", "بناء صفحات ومواقع الويب من الأساس، خطوة بخطوة.") +
-    soonTrackCard("more", "مسارات برمجة أخرى", "لغات ومواضيع برمجة جديدة تُضاف تدريجيًا حسب جاهزيتها.");
+    soonTrackCard("python", "code", "لغة Python", "أساسيات البرمجة والتفكير المنطقي بلغة سهلة وواسعة الاستعمال.") +
+    soonTrackCard("web", "globe", "صناعة المواقع", "بناء صفحات ومواقع الويب من الأساس، خطوة بخطوة.") +
+    soonTrackCard("more", "layers", "مسارات برمجة أخرى", "لغات ومواضيع برمجة جديدة تُضاف تدريجيًا حسب جاهزيتها.");
   shell(
     '<section class="landing-hero">' +
-      '<img class="landing-logo" src="assets/club-logo.jpg" alt="شعار نادي الروبوتيك والذكاء الاصطناعي">' +
-      '<h1>تعلّم البرمجة والروبوتيك خطوة بخطوة — من أول دائرة كهربائية إلى روبوتات ذكية</h1>' +
-      '<p class="landing-promise">أكاديمية عربية مجانية بتوجيه أستاذك، لتلاميذ الإعدادي وأولياء أمورهم. مسارنا الأول المتاح الآن: <strong>الأردوينو والروبوتيك</strong> — دروس فيديو قصيرة، توصيل موجّه خطوة بخطوة، واختبار في نهاية كل درس، حتى يبني التلميذ مشاريعه الحقيقية بنفسه.</p>' +
-      '<div class="landing-ctas">' +
-        '<a class="btn btn-primary" href="#/register">أنشئ حسابك مجانًا</a>' +
-        '<a class="btn btn-ghost" href="#/login">تسجيل الدخول</a>' +
+      '<svg class="hero-circuit-ornament" viewBox="0 0 600 260" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">' +
+        '<path d="M12 40h110l32 32h140M40 120h85l28-28h96M18 205h130l36-36h115M588 55H468l-34 34H320M565 175H450l-30 30H310" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<circle cx="294" cy="72" r="4.5" fill="currentColor"/><circle cx="249" cy="92" r="4.5" fill="currentColor"/><circle cx="299" cy="169" r="4.5" fill="currentColor"/>' +
+        '<circle cx="320" cy="89" r="4.5" fill="currentColor"/><circle cx="310" cy="205" r="4.5" fill="currentColor"/>' +
+        '<circle cx="12" cy="40" r="3.5" stroke="currentColor" stroke-width="1.5"/><circle cx="588" cy="55" r="3.5" stroke="currentColor" stroke-width="1.5"/>' +
+      '</svg>' +
+      '<div class="landing-hero-grid">' +
+        '<div class="landing-hero-copy">' +
+          '<div class="landing-logo-wrap"><img class="landing-logo" src="assets/club-logo.jpg" alt="شعار نادي الروبوتيك والذكاء الاصطناعي"></div>' +
+          '<h1>تعلّم البرمجة والروبوتيك خطوة بخطوة — من أول دائرة كهربائية إلى روبوتات ذكية</h1>' +
+          '<p class="landing-promise">أكاديمية عربية مجانية بتوجيه أستاذك، لتلاميذ الإعدادي وأولياء أمورهم. مسارنا الأول المتاح الآن: <strong>الأردوينو والروبوتيك</strong> — دروس فيديو قصيرة، توصيل موجّه خطوة بخطوة، واختبار في نهاية كل درس، حتى يبني التلميذ مشاريعه الحقيقية بنفسه.</p>' +
+          '<div class="landing-ctas">' +
+            '<a class="btn btn-primary btn-lg" href="#/register">أنشئ حسابك مجانًا</a>' +
+            '<a class="btn btn-ghost btn-lg" href="#/login">تسجيل الدخول</a>' +
+          '</div>' +
+          '<p class="landing-browse-row"><button class="landing-browse" type="button" data-scroll="landing-levels"><span>تصفح المستويات</span>' + icon("arrow-down", "icon-sm") + '</button></p>' +
+          '<p class="landing-free">' + icon("check-circle", "icon-sm") + '<span>الأكاديمية مجانية بالكامل — أنشئ حسابك وابدأ أول درس في دقائق.</span></p>' +
+        '</div>' +
+        '<div class="landing-hero-visual" aria-hidden="true">' +
+          '<div class="landing-hero-frame"><img class="landing-hero-art" src="assets/hero.png" alt=""></div>' +
+        '</div>' +
       '</div>' +
-      '<p class="landing-browse-row"><button class="landing-browse" type="button" data-scroll="landing-levels">تصفح المستويات ↓</button></p>' +
       '<div class="landing-stats">' +
-        '<div class="landing-stat"><span class="landing-stat-num" data-stat="lessons">' + totalLessons + '</span><span class="landing-stat-label">درسًا</span></div>' +
-        '<div class="landing-stat"><span class="landing-stat-num" data-stat="levels">' + totalLevels + '</span><span class="landing-stat-label">مستويات متدرجة</span></div>' +
-        '<div class="landing-stat"><span class="landing-stat-num">شهادة</span><span class="landing-stat-label">لكل مستوى</span></div>' +
-        '<div class="landing-stat"><span class="landing-stat-num">مجاني</span><span class="landing-stat-label">بالكامل</span></div>' +
+        '<div class="landing-stat"><span class="landing-stat-icon">' + icon("book", "icon-md") + '</span><span class="landing-stat-num" data-stat="lessons">' + totalLessons + '</span><span class="landing-stat-label">درسًا</span></div>' +
+        '<div class="landing-stat"><span class="landing-stat-icon">' + icon("layers", "icon-md") + '</span><span class="landing-stat-num" data-stat="levels">' + totalLevels + '</span><span class="landing-stat-label">مستويات متدرجة</span></div>' +
+        '<div class="landing-stat"><span class="landing-stat-icon">' + icon("award", "icon-md") + '</span><span class="landing-stat-num">شهادة</span><span class="landing-stat-label">لكل مستوى</span></div>' +
+        '<div class="landing-stat"><span class="landing-stat-icon">' + icon("shield", "icon-md") + '</span><span class="landing-stat-num">مجاني</span><span class="landing-stat-label">بالكامل</span></div>' +
       '</div>' +
-      '<p class="landing-free">الأكاديمية مجانية بالكامل — أنشئ حسابك وابدأ أول درس في دقائق.</p>' +
     '</section>' +
-    '<section class="card landing-about"><h2>عن الأكاديمية</h2>' +
+    '<section class="landing-section card landing-about"><h2>' + icon("book", "icon-md") + '<span>عن الأكاديمية</span></h2>' +
       '<p>«أكاديمية الروبوتيك والذكاء الاصطناعي» منصة تعليمية موجّهة إلى <strong>تلاميذ المرحلة الإعدادية</strong> لتعلّم الإلكترونيات والبرمجة والروبوتيك بالعربية، درسًا بعد درس ومشروعًا بعد مشروع. بدأت بمسار <strong>الأردوينو والروبوتيك</strong> — أول مساراتها — وستنضم إليه لاحقًا مسارات أخرى في البرمجة مثل بايثون وبناء المواقع، تُعلن هنا فور جاهزيتها.</p>' +
       '<p>طريقتنا: <strong>دروس فيديو</strong> قصيرة وواضحة، <strong>توصيل موجّه</strong> للأسلاك والمكونات خطوة بخطوة، <strong>تجارب تفاعلية</strong> داخل المنصة تتدرب عليها قبل لمس المكونات الحقيقية، <strong>اختبار قصير</strong> في نهاية كل درس، و<strong>مشاريع تطبيقية</strong> تجمع ما تعلمته.</p>' +
       '<p>تعمل الأكاديمية <strong>على الإنترنت</strong> من أي متصفح، وتتوفر أيضًا في <strong>نسخة دون اتصال</strong> تعمل كاملة على حاسوب القسم — وتقدّمك محفوظ ومحمي بحسابك الخاص.</p>' +
-      '<p><strong>لأولياء الأمور والمشرفين:</strong> الأكاديمية مجانية بالكامل وبلا إعلانات؛ يتقدّم كل تلميذ بوتيرته مع اختبارات موثّقة وشهادة عند إتمام كل مستوى، ويرافق أستاذ النادي التلاميذ ويتابع تقدّمهم.</p>' +
+      '<p class="about-parents-callout"><strong>لأولياء الأمور والمشرفين:</strong> الأكاديمية مجانية بالكامل وبلا إعلانات؛ يتقدّم كل تلميذ بوتيرته مع اختبارات موثّقة وشهادة عند إتمام كل مستوى، ويرافق أستاذ النادي التلاميذ ويتابع تقدّمهم.</p>' +
     '</section>' +
-    '<section class="landing-why"><h2 class="page-title">لماذا أكاديميتنا؟</h2>' +
+    '<section class="landing-section landing-why"><div class="section-head"><h2 class="page-title">لماذا أكاديميتنا؟</h2></div>' +
       '<div class="landing-features">' +
-        feature("🎬", "دروس فيديو بالعربية المبسطة") +
-        feature("🧪", "تجارب تفاعلية داخل الدرس") +
-        feature("✅", "اختبارات فورية بتصحيح تلقائي") +
-        feature("🔧", "مشاريع عملية خطوة بخطوة") +
-        feature("🌐", "تعمل بالإنترنت وبدونها") +
+        feature("video", "دروس فيديو بالعربية المبسطة") +
+        feature("flask", "تجارب تفاعلية داخل الدرس") +
+        feature("check-circle", "اختبارات فورية بتصحيح تلقائي") +
+        feature("cpu", "مشاريع عملية خطوة بخطوة") +
+        feature("globe", "تعمل بالإنترنت وبدونها") +
       '</div>' +
     '</section>' +
-    '<section class="landing-tracks" id="landing-tracks"><h2 class="page-title">مسارات الأكاديمية</h2>' +
-      '<p class="landing-tracks-intro">الأكاديمية أوسع من مسار واحد: بدأت بالأردوينو والروبوتيك، وستضم تدريجيًا مسارات أخرى في البرمجة — يظهر كل مسار هنا فور جاهزيته.</p>' +
+    '<section class="landing-section landing-tracks" id="landing-tracks"><div class="section-head"><h2 class="page-title">مسارات الأكاديمية</h2>' +
+      '<p class="landing-tracks-intro">الأكاديمية أوسع من مسار واحد: بدأت بالأردوينو والروبوتيك، وستضم تدريجيًا مسارات أخرى في البرمجة — يظهر كل مسار هنا فور جاهزيته.</p></div>' +
       '<div class="landing-track-grid">' + trackCards + '</div>' +
     '</section>' +
-    '<section class="landing-levels" id="landing-levels"><h2 class="page-title">المستويات والدورات</h2>' +
-      '<p class="landing-track-note">مسار <strong>الأردوينو والروبوتيك</strong> بالتفصيل: مستوياته المتدرجة من الصفر إلى المشاريع المتقدمة. اضغط أي بطاقة للتسجيل والبدء بها، وافتح «محتوى المستوى» لمعاينة دروسه قبل أن تبدأ.</p>' +
+    '<section class="landing-section landing-levels" id="landing-levels"><div class="section-head"><h2 class="page-title">المستويات والدورات</h2>' +
+      '<p class="landing-track-note">مسار <strong>الأردوينو والروبوتيك</strong> بالتفصيل: مستوياته المتدرجة من الصفر إلى المشاريع المتقدمة. اضغط أي بطاقة للتسجيل والبدء بها، وافتح «محتوى المستوى» لمعاينة دروسه قبل أن تبدأ.</p></div>' +
       '<div class="landing-level-grid">' + levelCards + '</div>' +
     '</section>' +
-    '<section class="card landing-steps"><h2>كيف يعمل؟</h2>' +
+    '<section class="landing-section card landing-steps"><h2>' + icon("layers", "icon-md") + '<span>كيف يعمل؟</span></h2>' +
       '<ol class="steps-list">' +
         '<li><strong>أنشئ حسابك</strong> — بالاستمارة الاحترافية أو بحساب Google، في دقيقة واحدة.</li>' +
         '<li><strong>تعلّم درسًا بعد درس</strong> — شاهد الفيديو، نفّذ التوصيل الموجّه، وجرّب بنفسك.</li>' +
@@ -912,19 +1006,15 @@ function renderLanding() {
         '<li><strong>احصل على شهادة المستوى</strong> — أكمل دروس المستوى وتمرينه البرمجي لتصبح شهادتك جاهزة باسمك.</li>' +
       '</ol>' +
     '</section>' +
-    '<section class="card landing-certs">' +
-      '<img class="landing-cert-img" src="assets/certificate.png" alt="نموذج من شهادة إتمام مستوى في الأكاديمية">' +
-      '<div class="landing-cert-text"><h2>شهادات إتمام المستويات</h2>' +
+    '<section class="landing-section card landing-certs">' +
+      '<div class="landing-cert-stage"><img class="landing-cert-img" src="assets/certificate.png" alt="نموذج من شهادة إتمام مستوى في الأكاديمية"></div>' +
+      '<div class="landing-cert-text"><h2>' + icon("award", "icon-md") + '<span>شهادات إتمام المستويات</span></h2>' +
       '<p>حين يتمّ التلميذ جميع دروس مستوى ما، ويجتاز اختبار كل درس فيها (<strong>3 من 4</strong> على الأقل)، ويُنجز تمرين المستوى البرمجي، تصبح <strong>شهادة إتمام المستوى</strong> جاهزة للطباعة — وتُطبع <strong>باسم التلميذ الكامل كما سجّله</strong> في حسابه. شهادة لكل مستوى، من المستوى الأول حتى الخامس.</p></div>' +
     '</section>' +
-    '<section class="landing-outro">' +
-      '<p>جاهز لبناء أول دائرة لك؟</p>' +
-      '<div class="landing-ctas"><a class="btn btn-primary" href="#/register">أنشئ حسابك مجانًا</a></div>' +
-    '</section>' +
-    '<footer class="landing-footer">' +
-      '<p>من إعداد الأستاذ محمد الغوات — نادي الروبوتيك والذكاء الاصطناعي</p>' +
-      '<p><a href="https://www.youtube.com/@AiRoboticsClub-o3x" target="_blank" rel="noopener">قناة اليوتيوب: Ai &amp; Robotics Club</a> · <a href="privacy.html">سياسة الخصوصية</a></p>' +
-    '</footer>', "مرحبًا بك"
+    '<section class="landing-section landing-outro">' +
+      '<p class="landing-outro-title">جاهز لبناء أول دائرة لك؟</p>' +
+      '<div class="landing-ctas"><a class="btn btn-primary btn-lg" href="#/register">أنشئ حسابك مجانًا</a></div>' +
+    '</section>', "مرحبًا بك"
   );
   /* عناصر «مرّر إلى المستويات»: زر «تصفح المستويات» وبطاقة مسار الأردوينو
      الحيّة — تمرير ناعم إلى فهرس المستويات دون لمس الموجّه. بطاقات
@@ -1068,7 +1158,7 @@ function renderAuth(mode) {
       '<p class="auth-switch">' + (isReg
         ? 'عندك حساب من قبل؟ <a href="#/login">سجّل الدخول</a>'
         : 'أول مرة هنا؟ <a href="#/register">أنشئ حسابك</a><br><a href="#/recover">نسيت كلمة السر؟ الاستعادة بمساعدة الأستاذ</a>') + '</p>' +
-      '<p class="auth-switch"><a href="#/teacher">📋 لوحة الأستاذ — تجميع نتائج القسم من النسخ الاحتياطية</a></p>' +
+      '<p class="auth-switch"><a class="inline-icon-link" href="#/teacher">' + icon("board", "icon-sm") + '<span>لوحة الأستاذ — تجميع نتائج القسم من النسخ الاحتياطية</span></a></p>' +
     '</section>', isReg ? "إنشاء حساب جديد" : "تسجيل الدخول"
   );
   /* أخطاء الحقول: تُعرض تحت كل حقل بعينه، والقيم تبقى كما كتبها التلميذ */
@@ -1171,7 +1261,7 @@ function renderRecover() {
       (keyOn
         ? '<p class="muted small">الاستعادة على هذا الحاسوب محمية بـ<strong>ملف مفتاح الأستاذ</strong> (امتداده .academykey) الذي يحتفظ به الأستاذ في ذاكرة USB الخاصة به: لا تتم إعادة التعيين دون رفع الملف الصحيح. حدوده بصراحة: تُحفظ بصمة سرّ المفتاح (SHA-256) في متصفح هذا الحاسوب والتحقق محلي بالكامل — رادع وفحص حيازة، لا حماية بمستوى الخوادم.</p>'
         : '<p class="quiz-result warn" role="alert">تنبيه: لم يُنشأ بعدُ «ملف مفتاح الأستاذ» على هذا الحاسوب، فتعمل الاستعادة مؤقتًا بنمط الحضور المشرف: حضور الأستاذ فعليًا بجانب التلميذ. أنشئ ملف المفتاح الآن لربط الاستعادة بحيازة ملف يحمله الأستاذ في USB:</p>' +
-          '<div class="backup-actions"><button class="btn btn-ghost" id="btn-make-key" type="button">🔑 إنشاء ملف مفتاح الأستاذ</button></div>' +
+          '<div class="backup-actions"><button class="btn btn-ghost" id="btn-make-key" type="button">' + icon("key", "icon-sm") + '<span>إنشاء ملف مفتاح الأستاذ</span></button></div>' +
           '<p class="muted small" id="key-msg" role="status" aria-live="polite"></p>' +
           '<p class="muted small">حدود هذه الطريقة بصراحة: لا يوجد خادم في منصة تعمل على حاسوب القسم نفسه؛ المفتاح رادع محلي وفحص حيازة — من يملك وصولًا كاملًا إلى ملفات الحاسوب ومتصفحه يستطيع تجاوز أي حماية محلية. احتفظ بملف المفتاح في USB الأستاذ فقط، ولا تتركه في مجلد المنصة.</p>') +
       '<form id="recover-form" autocomplete="off">' +
@@ -1280,8 +1370,8 @@ function renderHome() {
       '<div class="progress-label">أنجزت ' + st.pct + '% من هذا المستوى</div>' +
       (levelComplete(rec, lv.n)
         ? (rec.playgroundPassed && rec.playgroundPassed[lv.n]
-            ? '<div class="level-done-badge">🏆 أكملت هذا المستوى — شهادتك جاهزة في صفحة المستوى</div>'
-            : '<div class="level-done-badge">🏆 أكملت دروس هذا المستوى — بقي التمرين البرمجي الأخير في صفحة المستوى لتفتح شهادتك</div>')
+            ? '<div class="level-done-badge">' + icon("award", "icon-sm") + '<span>أكملت هذا المستوى — شهادتك جاهزة في صفحة المستوى</span></div>'
+            : '<div class="level-done-badge">' + icon("award", "icon-sm") + '<span>أكملت دروس هذا المستوى — بقي التمرين البرمجي الأخير في صفحة المستوى لتفتح شهادتك</span></div>')
         : '') + '</a>';
   }).join("");
   const lastLesson = rec.lastLessonId ? lessonById(rec.lastLessonId) : null;
@@ -1294,11 +1384,11 @@ function renderHome() {
       '<div class="dash-item grow"><div class="progress"><div class="progress-fill" style="width:' + overallPct + '%"></div></div><span class="dash-label">واصل يا بطل — درسًا بعد درس تصنع روبوتك الأول</span></div>' +
     '</section>' +
     (lastLesson
-      ? '<section class="card resume-card"><h2>📌 تابع من حيث توقفت</h2>' +
+      ? '<section class="card resume-card"><h2>' + icon("bookmark", "icon-md") + '<span>تابع من حيث توقفت</span></h2>' +
         '<p>آخر درس فتحته: <strong>' + esc(lastLesson.title) + '</strong> (المستوى ' + lastLesson.level + ' — الدرس ' + lastLesson.num + ').</p>' +
         '<a class="btn btn-primary" href="#/lesson/' + lastLesson.id + '">متابعة الدرس</a></section>'
       : '') +
-    '<section class="card backup-card"><h2>💾 النسخة الاحتياطية — احفظ تقدّمك وانقله بأمان</h2>' +
+    '<section class="card backup-card"><h2>' + icon("save", "icon-md") + '<span>النسخة الاحتياطية — احفظ تقدّمك وانقله بأمان</span></h2>' +
       '<p class="muted">الحسابات والتقدّم يعيشان في متصفح هذا الحاسوب فقط، ونسخ مجلد المنصة إلى حاسوب آخر <strong>لا ينقلهما</strong>. للاحتفاظ بنسخة أو نقل التقدّم إلى حاسوب آخر: صدّر ملف النسخة الاحتياطية من هنا، ثم استورده من نفس البطاقة على الحاسوب الآخر. عند الاستيراد لن يُحذف أي حساب موجود غير مذكور في النسخة، وأي اسم متعارض يبقى كما هو إلا إذا اخترت استبداله بنفسك.</p>' +
       (notice ? '<p class="quiz-result ok" role="status">' + esc(notice) + '</p>' : '') +
       '<div class="backup-actions">' +
@@ -1307,7 +1397,7 @@ function renderHome() {
       '</div>' +
       '<p class="muted small" id="import-msg" role="status" aria-live="polite"></p>' +
       '<div class="backup-actions">' +
-        '<button class="btn btn-ghost" id="btn-sync" type="button">☁️ مزامنة سحابية (اختيارية — تحتاج إنترنت)</button>' +
+        '<button class="btn btn-ghost" id="btn-sync" type="button">' + icon("cloud", "icon-sm") + '<span>مزامنة سحابية (اختيارية — تحتاج إنترنت)</span></button>' +
       '</div>' +
       '<p class="muted small" id="sync-msg" role="status" aria-live="polite"></p>' +
       '<p class="muted small">المزامنة طبقة اختيارية منفصلة تمامًا عن عمل المنصة دون إنترنت: تنقل نسختك الاحتياطية إلى ملف خاص في حساب Google Drive الخاص بك لاستعادتها من حاسوب آخر. لا تعمل إلا باتصال وتهيئة مسبقة من الأستاذ — شرح التهيئة خطوة بخطوة في ملف SYNC-SETUP.md داخل مجلد المنصة.</p>' +
@@ -1373,13 +1463,13 @@ function typeBadge(t) {
 function certAreaHTML(rec, n) {
   if (!levelComplete(rec, n)) return "";
   if (rec.playgroundPassed && rec.playgroundPassed[n]) {
-    return '<section class="card cert-card"><h2>🏆 شهادة إتمام المستوى</h2>' +
+    return '<section class="card cert-card"><h2>' + icon("award", "icon-md") + '<span>شهادة إتمام المستوى</span></h2>' +
       '<p>أكملت جميع دروس هذا المستوى واجتزت تمرينه البرمجي — أحسنت! احصل على شهادتك واطبعها وعلّقها بفخر.</p>' +
       '<a class="btn btn-primary" href="#/certificate/' + n + '">شهادة إتمام المستوى</a></section>';
   }
   const pg = PLAYGROUNDS[n];
   if (!pg) return "";
-  return '<section class="card playground-card"><h2>💻 ملعب الكود — تمرين أخير قبل الشهادة</h2>' +
+  return '<section class="card playground-card"><h2>' + icon("code", "icon-md") + '<span>ملعب الكود — تمرين أخير قبل الشهادة</span></h2>' +
     '<p>أكملت جميع دروس هذا المستوى باختباراتها — لم يبقَ لفتح شهادتك إلا تمرين برمجي قصير واحد يثبت أنك تكتب الكود بنفسك:</p>' +
     '<p><strong>' + esc(pg.title) + ':</strong> ' + esc(pg.prompt) + '</p>' +
     '<label class="pg-label">اكتب الكود هنا<textarea id="pg-input" class="pg-input" dir="ltr" rows="4" spellcheck="false" placeholder="' + esc(pg.hint) + '"></textarea></label>' +
@@ -1396,7 +1486,7 @@ function renderLevel(n) {
     const p = me.rec.progress && me.rec.progress[l.id];
     const done = isPassed(p, l);
     const quiz = p && typeof p.quizBest === "number" && p.quizTotal
-      ? '<span class="lesson-quiz">🏆 أفضل نتيجة: ' + p.quizBest + '/' + p.quizTotal + '</span>' : "";
+      ? '<span class="lesson-quiz">' + icon("award", "icon-sm") + '<span>أفضل نتيجة: ' + p.quizBest + '/' + p.quizTotal + '</span></span>' : "";
     return '<a class="lesson-row' + (done ? " is-done" : "") + '" href="#/lesson/' + l.id + '">' +
       '<span class="lesson-check">' + (done ? "✓" : l.num) + '</span>' +
       '<span class="lesson-main"><span class="lesson-title">' + esc(l.title) + '</span>' + quiz + '</span>' +
@@ -1467,7 +1557,7 @@ function renderCertificate(n) {
       '</div>' +
     '</section>' +
     '<div class="cert-actions cert-print-row">' +
-      '<button class="btn btn-primary" id="btn-print-cert" type="button">🖨️ طباعة الشهادة</button>' +
+      '<button class="btn btn-primary" id="btn-print-cert" type="button">' + icon("printer", "icon-sm") + '<span>طباعة الشهادة</span></button>' +
       '<a class="btn btn-ghost" href="#/level/' + lv.n + '">عودة إلى المستوى</a></div>', "شهادة إتمام المستوى " + lv.n
   );
   $("#btn-print-cert").addEventListener("click", () => window.print());
@@ -1517,19 +1607,19 @@ function renderTeacher() {
   const schools = Array.from(new Set(allRows.map(r => r.school).filter(Boolean))).sort();
   shell(
     '<p class="crumbs"><a href="#/">الرئيسية</a> ← لوحة الأستاذ</p>' +
-    '<h1 class="page-title">📋 مركز الأستاذ — لوحة التتبع</h1>' +
+    '<h1 class="page-title">' + icon("board", "icon-lg") + '<span>مركز الأستاذ — لوحة التتبع</span></h1>' +
     '<section class="dash-strip teacher-stats">' +
       '<div class="dash-item"><span class="dash-value" id="teacher-stat-students">' + allRows.length + '</span><span class="dash-label">تلميذ مسجّل</span></div>' +
       '<div class="dash-item"><span class="dash-value" id="teacher-stat-mean">' + meanPct + '%</span><span class="dash-label">متوسط التقدّم العام</span></div>' +
       '<div class="dash-item"><span class="dash-value" id="teacher-stat-certs">' + totalCerts + '</span><span class="dash-label">شهادة مستوى محقّقة</span></div>' +
       '<div class="dash-item grow"><span class="dash-label">المصدر: حسابات هذا الحاسوب + النسخ الاحتياطية المستوردة في هذه الجلسة. اضغط «عرض قاعدة بيانات التلميذ» أمام أي تلميذ لرؤية سجلّه الكامل درسًا بدرس.</span></div>' +
     '</section>' +
-    '<section class="card"><h2>استيراد نسخ التلاميذ الاحتياطية</h2>' +
+    '<section class="card"><h2>' + icon("upload", "icon-md") + '<span>استيراد نسخ التلاميذ الاحتياطية</span></h2>' +
       '<p class="muted">اسحب ملفات النسخ الاحتياطية (JSON) التي صدّرها تلاميذك من منصاتهم وأفلتها في منطقة الإفلات، أو اخترها بالزر — يقبل عدة ملفات دفعة واحدة. كل ملف يُفحص بمدقّق النسخ نفسه، والملف غير الصالح يُرفض برسالة خاصّة به دون أن يوقف البقية.</p>' +
       '<p class="muted"><strong>تنبيه مهم:</strong> الاستيراد هنا للعرض والتتبّع فقط — لا يغيّر حسابات هذا الحاسوب ولا تقدّم أي تلميذ فيه إطلاقًا. الدمج الفعلي في حسابات هذا الحاسوب يكون من بطاقة النسخة الاحتياطية في الصفحة الرئيسية وباختيارك الصريح هناك.</p>' +
       '<p class="muted small">«النقاط» هي مجموع أفضل نتائج الاختبارات (quizBest) كما هي مخزّنة فعلًا في سجلات التلاميذ. الدرس يُحسب منجزًا باجتياز اختباره فقط (قاعدة المنصة)، والشهادة تُحتسب عند إتمام دروس المستوى وتمرين ملعب الكود معًا.</p>' +
       '<div class="drop-zone" id="teacher-drop">' +
-        '<p class="drop-zone-text">📥 أفلت ملفات النسخ الاحتياطية هنا</p>' +
+        '<p class="drop-zone-text">' + icon("upload", "icon-lg") + '<span>أفلت ملفات النسخ الاحتياطية هنا</span></p>' +
         '<label class="btn btn-primary">اختيار ملفات النسخ الاحتياطية<input id="teacher-files" type="file" accept="application/json,.json" multiple hidden></label>' +
       '</div>' +
       '<div id="teacher-msgs">' + teacherData.messages.map(m =>
@@ -1555,7 +1645,7 @@ function renderTeacher() {
       '<div id="teacher-table-zone"></div>' +
       '<div class="backup-actions"><button class="btn btn-primary" id="btn-teacher-csv" type="button">تصدير جدول القسم كاملًا CSV (يفتحه Excel)</button></div>' +
     '</section>' +
-    '<section class="card"><h2>🔑 مفتاح الأستاذ لاستعادة الحسابات</h2>' +
+    '<section class="card"><h2>' + icon("key", "icon-md") + '<span>مفتاح الأستاذ لاستعادة الحسابات</span></h2>' +
       (keyOn
         ? '<p class="muted">يوجد مفتاح أستاذ مهيأ على هذا الحاسوب: صفحة الاستعادة (#/recover) تطلب رفع ملف المفتاح (.academykey) قبل أي إعادة تعيين. إن ضاع الملف من USB، أنشئ مفتاحًا جديدًا من هنا — وسيبطل القديم فورًا.</p>'
         : '<p class="muted">لا يوجد مفتاح أستاذ مهيأ بعد على هذا الحاسوب: الاستعادة في #/recover تعمل بنمط الحضور المشرف فقط. أنشئ ملف المفتاح واحتفظ به في ذاكرة USB الخاصة بك وحدك.</p>') +
@@ -1658,11 +1748,11 @@ function renderTeacherTable() {
               .filter(Boolean).map(esc).join(" · ") + '</span>' : '') +
       '</td>' +
       '<td><span class="provider-badge">' + (r.provider === "google" ? "Google" : "استمارة") + '</span><br>' +
-        '<span class="muted small">' + (r.allComplete ? "🏆 أكمل كل المستويات" : "المستوى الحالي " + r.currentLevel) + '</span></td>' +
+        '<span class="muted small">' + (r.allComplete ? icon("award", "icon-sm") + " أكمل كل المستويات" : "المستوى الحالي " + r.currentLevel) + '</span></td>' +
       '<td><strong>' + r.doneCount + ' / ' + r.totalLessons + '</strong> درسًا<br>' +
         '<span class="muted small">التقدّم العام ' + r.overallPct + '% · النقاط ' + r.earned + (r.possible ? ' / ' + r.possible : '') + '</span></td>' +
       '<td class="small">' + r.perLevel.map(p => 'م' + p.n + ': ' + p.done + '/' + p.total).join(' · ') + '</td>' +
-      '<td>' + (r.certificates ? '🏆 × ' + r.certificates : '—') + '</td>' +
+      '<td>' + (r.certificates ? '<span class="inline-icon-badge">' + icon("award", "icon-sm") + '<span>× ' + r.certificates + '</span></span>' : '—') + '</td>' +
       '<td class="small"><span dir="ltr">' + fmtStamp(r.updatedAt) + '</span></td>' +
       '<td><a class="btn btn-ghost btn-small" href="#/teacher/student/' + encodeURIComponent(r.username) + '">عرض قاعدة بيانات التلميذ</a></td>' +
     '</tr>').join("") +
@@ -1691,7 +1781,7 @@ function renderTeacherStudent(key) {
     return '<section class="card student-level"><h2>المستوى ' + lv.n + ': ' + esc(lv.title) + '</h2>' +
       '<p class="muted">دروس منجزة: <strong>' + st.done + ' / ' + st.total + '</strong> · ' +
       'تمرين ملعب الكود: <strong>' + (pg ? "تم بنجاح ✓" : "لم يُنجز بعد") + '</strong> · ' +
-      'الشهادة: <strong>' + (cert ? "محقّقة 🏆" : "مقفلة") + '</strong>' +
+      'الشهادة: <strong>' + (cert ? icon("award", "icon-sm") + " محقّقة" : "مقفلة") + '</strong>' +
       (doneDate ? ' · تاريخ إتمام الدروس: <span dir="ltr">' + doneDate + '</span>' : '') + '</p>' +
       '<div class="table-wrap"><table class="class-table"><thead><tr><th>الدرس</th><th>الحالة</th><th>أفضل نتيجة في الاختبار</th></tr></thead><tbody>' +
       lessons.map(l => {
@@ -1699,14 +1789,14 @@ function renderTeacherStudent(key) {
         const passed = isPassed(p, l);
         const best = p && typeof p.quizBest === "number" && p.quizTotal ? p.quizBest + ' / ' + p.quizTotal : '—';
         return '<tr class="lesson-status-row"><td>' + l.num + '. ' + esc(l.title) + '</td>' +
-          '<td>' + (passed ? "✅ منجز (اجتاز الاختبار)" : "لم يُنجز بعد") + '</td>' +
+          '<td>' + (passed ? '<span class="status-ok">' + icon("check-circle", "icon-sm") + '<span>منجز (اجتاز الاختبار)</span></span>' : "لم يُنجز بعد") + '</td>' +
           '<td>' + best + '</td></tr>';
       }).join("") +
       '</tbody></table></div></section>';
   }).join("");
   shell(
     '<p class="crumbs"><a href="#/teacher">→ عودة إلى لوحة الأستاذ</a></p>' +
-    '<h1 class="page-title">🗂️ قاعدة بيانات التلميذ: ' + esc(rec.name || key) + '</h1>' +
+    '<h1 class="page-title">' + icon("folder", "icon-lg") + '<span>قاعدة بيانات التلميذ: ' + esc(rec.name || key) + '</span></h1>' +
     '<section class="card student-info"><h2>بيانات الحساب</h2>' +
       '<div class="table-wrap"><table class="class-table"><tbody>' +
       '<tr><th>الاسم الكامل</th><td>' + esc(rec.name || key) + '</td></tr>' +
@@ -1816,14 +1906,14 @@ function doneCardHTML(l, p) {
   } else if (l.stub) {
     inner = '<p class="done-status" id="done-status">هذا الدرس قيد الإعداد. عند نشره سيُحتسب منجزًا بعد اجتياز اختباره القصير، مثل بقية الدروس.</p>';
   } else {
-    inner = '<p class="done-status" id="done-status">لا يُحتسب الدرس منجزًا إلا باجتياز اختباره القصير 📝: أجب عن جميع الأسئلة واحصل على ' +
+    inner = '<p class="done-status" id="done-status">لا يُحتسب الدرس منجزًا إلا باجتياز اختباره القصير: أجب عن جميع الأسئلة واحصل على ' +
       QUIZ_PASS_MIN + ' إجابات صحيحة على الأقل من ' + (l.quiz ? l.quiz.length : 4) +
       '. لا يوجد زر تعليم يدوي — النجاح في الاختبار هو وحده ما يُتمّ الدرس، ويمكنك إعادة المحاولة بلا حدود.' +
       (p && typeof p.quizScore === "number" && p.quizTotal
         ? '<br>آخر نتيجة لك في الاختبار: ' + p.quizScore + '/' + p.quizTotal + ' — لم تصل بعد إلى الحد المطلوب، حاول من جديد.</p>'
         : '</p>');
   }
-  return '<section class="card done-card"><h2>✅ إتمام الدرس</h2>' + inner + '</section>';
+  return '<section class="card done-card"><h2>' + icon("check-circle", "icon-md") + '<span>إتمام الدرس</span></h2>' + inner + '</section>';
 }
 
 /* ---------- صفحة درس ---------- */
@@ -1849,7 +1939,7 @@ function renderLesson(id) {
   let body = "";
   body += '<p class="crumbs"><a href="#/">الرئيسية</a> ← <a href="#/level/' + lv.n + '">المستوى ' + lv.n + ': ' + esc(lv.title) + '</a> ← الدرس ' + l.num + '</p>';
   body += '<div class="lesson-head"><h1 class="page-title">' + esc(l.title) + '</h1>' + typeBadge(l.type) + '</div>';
-  if (l.goal) body += '<p class="lesson-goal">🎯 هدف الدرس: ' + esc(l.goal) + '</p>';
+  if (l.goal) body += '<p class="lesson-goal">' + icon("target", "icon-md") + '<span>هدف الدرس: ' + esc(l.goal) + '</span></p>';
 
   /* مشغّل ذكي: إن نُشر الدرس على يوتيوب وكان الاتصال متاحًا، تظهر واجهة
      خفيفة (صورة مصغّرة + زر تشغيل) لا تُحمّل مشغّل يوتيوب إلا عند الضغط،
@@ -1858,14 +1948,14 @@ function renderLesson(id) {
   const yid = ytId(l);
   const isOnline = (typeof navigator === "undefined") || navigator.onLine !== false;
   if (yid && isOnline) {
-    body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' +
+    body += '<section class="card"><h2>' + icon("video", "icon-md") + '<span>فيديو الدرس</span></h2>' +
       '<div class="yt-facade" id="yt-facade" data-yt="' + yid + '" role="button" tabindex="0" aria-label="تشغيل فيديو الدرس على يوتيوب" style="background-image:url(\'https://i.ytimg.com/vi/' + yid + '/hqdefault.jpg\')">' +
       '<span class="yt-badge">YouTube</span><span class="yt-play" aria-hidden="true"></span>' +
       '<span class="yt-facade-label">شاهد الدرس على يوتيوب — قناة Ai &amp; Robotics Club</span></div>' +
       '<div id="yt-slot"></div>' +
       '<p class="muted small" id="video-note">يُشغَّل هذا الدرس عبر يوتيوب مع الترجمة العربية. إن تعذّر التشغيل على شبكتك، جرّب <a href="#" id="yt-use-local">النسخة المحلية من الفيديو</a>.</p></section>';
   } else {
-    body += '<section class="card"><h2>🎬 فيديو الدرس</h2>' + localVideoHTML(l) +
+    body += '<section class="card"><h2>' + icon("video", "icon-md") + '<span>فيديو الدرس</span></h2>' + localVideoHTML(l) +
       '<p class="muted small" id="video-note">ملف الفيديو المحلي: <span dir="ltr">' + videoPath(l) + '</span>' + (l.stub ? ' — سيُضاف عند إنتاجه.' : ' — وتظهر الترجمة العربية تلقائيًا أثناء التشغيل إذا وُجد ملف ترجمته بجانب المنصة.') + '</p></section>';
   }
   /* لا شريط قناة تحت الفيديو: دعوة الاشتراك تعيش داخل فيديوهات يوتيوب نفسها
@@ -1873,23 +1963,23 @@ function renderLesson(id) {
      الزر كان يفتح صفحة يوتيوب عند الضغط، والشريط كلّه زائد بلا فائدة). */
 
   if (l.stub) {
-    body += '<section class="card soon-card"><h2>🚧 هذا الدرس قيد الإعداد</h2><p>العنوان والنوع جاهزان في الخريطة المعتمدة، وسيُضاف الشرح والكود والفيديو والاختبار تباعًا. تابع الدروس الجاهزة الآن، وعد إلى هنا قريبًا.</p></section>';
+    body += '<section class="card soon-card"><h2>' + icon("clock", "icon-md") + '<span>هذا الدرس قيد الإعداد</span></h2><p>العنوان والنوع جاهزان في الخريطة المعتمدة، وسيُضاف الشرح والكود والفيديو والاختبار تباعًا. تابع الدروس الجاهزة الآن، وعد إلى هنا قريبًا.</p></section>';
   } else {
     if (l.explanation) {
-      body += '<section class="card"><h2>📖 الشرح</h2>' +
+      body += '<section class="card"><h2>' + icon("book", "icon-md") + '<span>الشرح</span></h2>' +
         l.explanation.map((t, pi) => '<p id="exp-para-' + pi + '">' + esc(t) + '</p>').join("") + '</section>';
     }
     if (l.components) {
-      body += '<section class="card"><h2>🧰 العناصر المستعملة</h2><ul class="nice-list">' +
+      body += '<section class="card"><h2>' + icon("tools", "icon-md") + '<span>العناصر المستعملة</span></h2><ul class="nice-list">' +
         l.components.map(c => '<li>' + esc(c) + '</li>').join("") + '</ul></section>';
     }
     if (l.code) {
-      body += '<section class="card"><h2>💻 الكود — ' + esc(l.code.title) + '</h2>' +
+      body += '<section class="card"><h2>' + icon("code", "icon-md") + '<span>الكود — ' + esc(l.code.title) + '</span></h2>' +
         '<div class="code-head"><button class="btn btn-small btn-primary" id="btn-copy" type="button">نسخ الكود</button><span class="muted small">الصقه في Arduino IDE</span></div>' +
         '<pre class="code-block" dir="ltr"><code id="lesson-code">' + esc(l.code.text) + '</code></pre></section>';
     }
     if (l.experiment) {
-      body += '<section class="card"><h2>🧪 جرّب بنفسك — تجربة تفاعلية</h2>' +
+      body += '<section class="card"><h2>' + icon("flask", "icon-md") + '<span>جرّب بنفسك — تجربة تفاعلية</span></h2>' +
         '<p class="exp-steps">خطوات كل تجربة: <strong>١ توقّع</strong> ماذا سيحدث ← <strong>٢ غيّر</strong> قيمة أو إعدادًا ← <strong>٣ لاحظ</strong> النتيجة بعينيك ← <strong>٤ فسّر</strong> لماذا حدثت</p>' +
         (l.experiment.type !== "blink"
           ? '<div class="exp-guide" id="exp-guide">' +
@@ -1910,8 +2000,8 @@ function renderLesson(id) {
         '<div id="experiment-slot"></div></section>';
     }
     if (l.quiz) {
-      body += '<section class="card"><h2>📝 اختبار سريع QCM</h2>' +
-        '<p class="muted">أجب عن جميع الأسئلة ثم اضغط «تصحيح الاختبار». إذا حصلت على ' + QUIZ_PASS_MIN + ' إجابات صحيحة على الأقل يُحتسب الدرس منجزًا ✅ — وإن لم تنجح هذه المرة، راجع الشرح وأعد المحاولة بلا حدود.</p><div id="quiz-box">' +
+      body += '<section class="card"><h2>' + icon("quiz", "icon-md") + '<span>اختبار سريع QCM</span></h2>' +
+        '<p class="muted">أجب عن جميع الأسئلة ثم اضغط «تصحيح الاختبار». إذا حصلت على ' + QUIZ_PASS_MIN + ' إجابات صحيحة على الأقل يُحتسب الدرس منجزًا — وإن لم تنجح هذه المرة، راجع الشرح وأعد المحاولة بلا حدود.</p><div id="quiz-box">' +
         l.quiz.map((q, qi) =>
           '<fieldset class="quiz-q"><legend>' + (qi + 1) + '. ' + esc(q.q) + '</legend>' +
           optionOrder(lessonOwner, l.id, qi, q.options.length).map(oi =>
@@ -1922,13 +2012,13 @@ function renderLesson(id) {
         '<p class="quiz-stale-note" id="quiz-stale-note" hidden>غيّرت إجابة بعد التصحيح — التصحيح المعروض يخص إجابتك السابقة. اضغط «تصحيح الاختبار» من جديد لترى تصحيح إجاباتك الحالية.</p>' +
         '<button class="btn btn-primary" id="btn-save-retry" type="button" hidden>إعادة محاولة حفظ النتيجة</button>' +
         (typeof saved.quizBest === "number" && saved.quizTotal
-          ? '<p class="muted">🏆 أفضل نتيجة سابقة لك في هذا الاختبار: ' + saved.quizBest + '/' + saved.quizTotal + '</p>' : "") +
+          ? '<p class="muted inline-icon-row">' + icon("award", "icon-sm") + '<span>أفضل نتيجة سابقة لك في هذا الاختبار: ' + saved.quizBest + '/' + saved.quizTotal + '</span></p>' : "") +
         '</div></section>';
     }
     if (Array.isArray(l.quizExtra) && l.quizExtra.length) {
       /* «تحدَّ نفسك»: أسئلة تدريب إضافية (توقّع/تطبيق/ملاحظة) غير مُقيَّمة —
          لا تُسجَّل ولا تدخل في إتمام الدرس إطلاقًا (قاعدة الاحتساب دون تغيير) */
-      body += '<section class="card pool-card"><h2>🌟 تحدَّ نفسك — أسئلة تدريب إضافية</h2>' +
+      body += '<section class="card pool-card"><h2>' + icon("spark", "icon-md") + '<span>تحدَّ نفسك — أسئلة تدريب إضافية</span></h2>' +
         '<p class="muted">أسئلة توقّع وتطبيق وملاحظة من محتوى هذا الدرس نفسه، للتدريب والمتعة فقط: <strong>لا تؤثر في نتيجتك ولا في إتمام الدرس</strong> — الإتمام يبقى باجتياز الاختبار المُقيَّم أعلاه وحده. اختر إجاباتك ثم اضغط «تحقق من إجابات التدريب» لترى التصحيح فورًا.</p><div id="pool-box">' +
         l.quizExtra.map((q, qi) =>
           '<fieldset class="quiz-q"><legend><span class="pool-kind">' + esc(q.kind) + '</span> ' + (qi + 1) + '. ' + esc(q.q) + '</legend>' +
@@ -1940,7 +2030,7 @@ function renderLesson(id) {
         '</div></section>';
     }
     if (l.exercises) {
-      body += '<section class="card"><h2>✏️ تمارين تطبيقية</h2><ol class="nice-list">' +
+      body += '<section class="card"><h2>' + icon("edit", "icon-md") + '<span>تمارين تطبيقية</span></h2><ol class="nice-list">' +
         l.exercises.map(e => '<li>' + esc(e) + '</li>').join("") + '</ol></section>';
     }
   }
