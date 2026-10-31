@@ -1,524 +1,2292 @@
-/* أكاديمية الروبوتيك والذكاء الاصطناعي — ثيم كحلي عميق + سماوي (مطابق لثيم فيديوهات الدروس) */
+/* ============================================================
+   أكاديمية الروبوتيك والذكاء الاصطناعي — نظام التصميم الموحّد
+   اللوحة اللونية المقفلة فقط: أبيض #FFFFFF + كحلي #0A2242/#10355F + سماوي #22C3E6/#0B6E8C
+   + تدرجات فاتحة #E3F6FC/#EEF4F9/#D7E3EE + حبر #12263A/#4F6579
+   ============================================================ */
+
 :root {
-  --navy-900: #050f1f;
-  --navy-800: #07182e;
-  --navy-700: #0a2242;
-  --navy-600: #10355f;
-  --cyan: #22c3e6;
-  --cyan-dark: #0b6e8c;
-  --cyan-soft: #e3f6fc;
-  --bg: #eef4f9;
-  --card: #ffffff;
-  --ink: #12263a;
-  --muted: #4f6579;
-  --line: #d7e3ee;
-  --good: #14703c;
-  --bad: #b92c2c;
-  --amber: #f2a81d;
-  --radius: 16px;
-  --shadow: 0 6px 24px rgba(7, 24, 46, .10);
+  /* ---------- 1. اللوحة اللونية المقفلة ---------- */
+  --color-white: #FFFFFF;
+  --color-navy-700: #0A2242;
+  --color-navy-600: #10355F;
+  --color-cyan: #22C3E6;
+  --color-cyan-dark: #0B6E8C;
+  --color-cyan-soft: #E3F6FC;
+  --color-bg: #EEF4F9;
+  --color-line: #D7E3EE;
+  --color-ink: #12263A;
+  --color-muted: #4F6579;
+
+  /* ألوان وظيفية للنجاح/الخطأ في الاستمارات والاختبارات فقط */
+  --color-good: #14703C;
+  --color-good-bg: rgba(20, 112, 60, 0.08);
+  --color-good-line: rgba(20, 112, 60, 0.28);
+  --color-bad: #B92C2C;
+  --color-bad-bg: rgba(185, 44, 44, 0.08);
+  --color-bad-line: rgba(185, 44, 44, 0.28);
+
+  /* متغيرات توافقية للطبقات المشتركة */
+  --navy-700: var(--color-navy-700);
+  --navy-600: var(--color-navy-600);
+  --cyan: var(--color-cyan);
+  --cyan-dark: var(--color-cyan-dark);
+  --cyan-soft: var(--color-cyan-soft);
+  --bg: var(--color-bg);
+  --card: var(--color-white);
+  --ink: var(--color-ink);
+  --muted: var(--color-muted);
+  --line: var(--color-line);
+  --good: var(--color-good);
+  --bad: var(--color-bad);
+
+  /* ---------- 2. سلّم المسافات (Spacing Scale) ---------- */
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.75rem;   /* 12px */
+  --space-4: 1rem;      /* 16px */
+  --space-5: 1.25rem;   /* 20px */
+  --space-6: 1.5rem;    /* 24px */
+  --space-8: 2rem;      /* 32px */
+  --space-10: 2.5rem;   /* 40px */
+  --space-12: 3rem;     /* 48px */
+  --space-16: 4rem;     /* 64px */
+  --container-max: 1140px;
+
+  /* ---------- 3. سلّم الخطوط (Typography Scale) ---------- */
+  --font-sans: "Segoe UI", Tahoma, Arial, sans-serif;
+  --font-mono: Consolas, "Courier New", monospace;
+  --text-xs: 0.8125rem; /* 13px */
+  --text-sm: 0.875rem;  /* 14px */
+  --text-base: 1rem;    /* 16px */
+  --text-md: 1.125rem;  /* 18px */
+  --text-lg: 1.25rem;   /* 20px */
+  --text-xl: 1.55rem;   /* ~25px */
+  --text-2xl: clamp(1.65rem, 3vw, 2.25rem);
+  --leading-tight: 1.38;
+  --leading-snug: 1.55;
+  --leading-body: 1.82;
+
+  /* ---------- 4. سلّم الزوايا (Radii Scale) ---------- */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --radius: var(--radius-md);
+
+  /* ---------- 5. سلّم الظلال (Shadow Scale — مشتق من الكحلي #0A2242) ---------- */
+  --shadow-xs: 0 1px 3px rgba(10, 34, 66, 0.05);
+  --shadow-sm: 0 4px 14px rgba(10, 34, 66, 0.06);
+  --shadow-md: 0 10px 28px rgba(10, 34, 66, 0.09);
+  --shadow-lg: 0 18px 42px rgba(10, 34, 66, 0.13);
+  --shadow: var(--shadow-sm);
+
+  /* ---------- 6. أنماط الدوائر الإلكترونية (SVG inline data-URI — ألوان اللوحة فقط) ---------- */
+  --pattern-circuit-subtle: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140' fill='none'%3E%3Cpath d='M0 28h36l16 16h34M86 44l14-14h40M28 0v22l14 14M112 0v30M0 98h28l18-18h38l18 18h38M70 80v34l14 14v12M28 140v-24l16-16' stroke='%230B6E8C' stroke-opacity='0.065' stroke-width='1.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='86' cy='44' r='2.6' fill='%2322C3E6' fill-opacity='0.14'/%3E%3Ccircle cx='46' cy='80' r='2.6' fill='%2322C3E6' fill-opacity='0.14'/%3E%3Ccircle cx='84' cy='128' r='2.4' fill='%230B6E8C' fill-opacity='0.10'/%3E%3Ccircle cx='112' cy='30' r='2.8' stroke='%230B6E8C' stroke-opacity='0.09' stroke-width='1.2'/%3E%3Ccircle cx='42' cy='36' r='2.2' fill='%2310355F' fill-opacity='0.07'/%3E%3C/svg%3E");
+  --pattern-circuit-hero: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140' fill='none'%3E%3Cpath d='M0 28h36l16 16h34M86 44l14-14h40M28 0v22l14 14M112 0v30M0 98h28l18-18h38l18 18h38M70 80v34l14 14v12M28 140v-24l16-16' stroke='%230B6E8C' stroke-opacity='0.135' stroke-width='1.35' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='86' cy='44' r='3' fill='%2322C3E6' fill-opacity='0.28'/%3E%3Ccircle cx='46' cy='80' r='3' fill='%2322C3E6' fill-opacity='0.28'/%3E%3Ccircle cx='84' cy='128' r='2.6' fill='%230B6E8C' fill-opacity='0.18'/%3E%3Ccircle cx='112' cy='30' r='3.2' stroke='%230B6E8C' stroke-opacity='0.18' stroke-width='1.35'/%3E%3Ccircle cx='42' cy='36' r='2.5' fill='%2310355F' fill-opacity='0.13'/%3E%3C/svg%3E");
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+
+/* ---------- الأساسيات ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
-  line-height: 1.8;
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  background-image:
+    var(--pattern-circuit-subtle),
+    radial-gradient(ellipse 95% 480px at 50% 0%, var(--color-cyan-soft) 0%, rgba(227, 246, 252, 0) 72%),
+    linear-gradient(180deg, var(--color-white) 0%, var(--color-bg) 360px, var(--color-bg) 100%);
+  background-attachment: scroll;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
 }
-a { color: var(--cyan-dark); text-decoration: none; }
-a:hover { text-decoration: underline; }
-/* مؤشر تركيز واضح للوحة المفاتيح؛ العنوان الذي ننقل إليه التركيز برمجيًا لا يحتاج إطارًا */
-:focus-visible { outline: 3px solid var(--cyan-dark); outline-offset: 2px; }
-h1[tabindex="-1"]:focus { outline: none; }
-h1, h2, h3 { line-height: 1.45; }
-.muted { color: var(--muted); }
-.small { font-size: .88rem; }
+#app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+a {
+  color: var(--color-cyan-dark);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+a:hover {
+  color: var(--color-navy-700);
+  text-decoration: underline;
+}
+:focus-visible {
+  outline: 3px solid var(--color-cyan-dark);
+  outline-offset: 2px;
+}
+h1[tabindex="-1"]:focus,
+main[tabindex="-1"]:focus {
+  outline: none;
+}
+h1, h2, h3 {
+  color: var(--color-navy-700);
+  line-height: var(--leading-tight);
+  margin-top: 0;
+}
+p {
+  margin: 0 0 var(--space-3);
+}
+p:last-child {
+  margin-bottom: 0;
+}
+.muted {
+  color: var(--color-muted);
+}
+.small {
+  font-size: var(--text-sm);
+}
 
-/* ---------- الترويسة ---------- */
-.site-header {
-  background: linear-gradient(135deg, var(--navy-800), var(--navy-600));
-  color: #fff;
-  box-shadow: var(--shadow);
+/* ---------- نظام الأيقونات الموحّد (Inline SVG Symbols) ---------- */
+.svg-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
 }
-.header-inner {
-  max-width: 1080px; margin: 0 auto; padding: .9rem 1.2rem;
-  display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;
+.icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+  vertical-align: -0.22em;
+  stroke: currentColor;
+  fill: none;
 }
-.brand { display: flex; align-items: center; gap: .9rem; color: #fff; }
-.brand:hover { text-decoration: none; }
-.brand-logo {
-  width: 62px; height: 62px; object-fit: contain;
-  background: #fff; border-radius: 14px; padding: 4px;
-  box-shadow: 0 0 0 3px rgba(34, 195, 230, .45);
+.icon-sm {
+  width: 16px;
+  height: 16px;
+  vertical-align: -0.18em;
 }
-.brand-text { min-width: 0; }
-.brand-name { display: block; font-size: 1.12rem; font-weight: 800; line-height: 1.5; }
-.brand-sub { display: block; font-size: .85rem; color: #aee6f7; direction: ltr; text-align: right; }
-.credit-bar {
-  background: var(--navy-900); color: var(--cyan);
-  text-align: center; font-weight: 700; font-size: .95rem; padding: .3rem 1rem;
-  border-top: 1px solid rgba(34, 195, 230, .35);
+.icon-md {
+  width: 20px;
+  height: 20px;
 }
-.user-box { display: flex; align-items: center; gap: .7rem; }
-.user-name { font-weight: 700; }
-/* زر الخروج فوق الترويسة الداكنة: نص وحدود فاتحان (الأزرق الداكن على الداكن لا يُقرأ) */
-.site-header .btn-ghost { color: #fff; border-color: rgba(255, 255, 255, .55); }
-.site-header .btn-ghost:hover { color: #aee6f7; border-color: var(--cyan); }
-/* نمط المنصات التعليمية: الدخول زر نصي هادئ، والتسجيل زر مملوء بارز */
-.btn-textlink {
-  background: none; border: none; cursor: pointer; font-family: inherit;
-  color: #dff3fb; font-weight: 700; font-size: .95rem; padding: .3rem .4rem;
+.icon-lg {
+  width: 26px;
+  height: 26px;
+}
+.inline-icon-link,
+.inline-icon-row,
+.inline-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.status-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-good);
+  font-weight: 700;
+}
+
+/* ---------- رابط تجاوز الترويسة ---------- */
+.skip-link {
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  top: -120px;
+  z-index: 100;
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  font-weight: 700;
+  padding: var(--space-3) var(--space-5);
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  box-shadow: var(--shadow-md);
+  transition: top 0.15s ease;
+}
+.skip-link:focus {
+  top: 0;
+  color: var(--color-white);
   text-decoration: none;
 }
-.btn-textlink:hover { color: #fff; text-decoration: underline; }
-.site-header .btn-signup {
-  font-weight: 800; border-color: rgba(255, 255, 255, .35);
-  box-shadow: 0 2px 12px rgba(34, 195, 230, .5);
-}
 
-/* ---------- التخطيط ---------- */
-.page { max-width: 1080px; margin: 0 auto; padding: 1.4rem 1.2rem 2.5rem; }
-.page-title { font-size: 1.6rem; margin: .4rem 0 .8rem; color: var(--navy-700); }
-.crumbs { color: var(--muted); font-size: .92rem; margin: 0 0 .4rem; }
-.site-footer {
-  background: var(--navy-800); color: #c9dcea; text-align: center;
-  padding: 1.2rem; font-size: .92rem;
+/* ---------- الشريط العلوي الأبيض النظيف (Edraak MOOC Header) ---------- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-line);
+  box-shadow: var(--shadow-xs);
 }
-.footer-credit { color: var(--cyan); font-weight: 700; }
-
-/* ---------- الأزرار ---------- */
-.btn {
-  display: inline-block; border: 2px solid transparent; cursor: pointer;
-  border-radius: 999px; padding: .5rem 1.3rem; font-size: 1rem; font-weight: 700;
-  font-family: inherit; transition: .15s;
+.header-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-3) var(--space-6);
+  min-height: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
 }
-.btn-primary { background: var(--cyan); color: var(--navy-900); }
-.btn-primary:hover { background: #4fd2f0; }
-.btn-ghost { background: transparent; color: var(--navy-700); border-color: var(--line); }
-.btn-ghost:hover { border-color: var(--cyan); color: var(--cyan-dark); text-decoration: none; }
-.btn-small { padding: .25rem .9rem; font-size: .9rem; }
-.btn-wide { width: 100%; padding: .7rem; }
-
-/* ---------- الدخول ---------- */
-.auth-card {
-  max-width: 460px; margin: 2.2rem auto; background: var(--card);
-  border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.8rem;
-  border-top: 6px solid var(--cyan);
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-navy-700);
+  min-width: 0;
 }
-.auth-card h1 { margin-top: 0; color: var(--navy-700); font-size: 1.4rem; }
-.auth-card label { display: block; margin: .8rem 0; font-weight: 700; }
-.auth-card input {
-  display: block; width: 100%; margin-top: .3rem; padding: .6rem .8rem;
-  border: 2px solid var(--line); border-radius: 10px; font-size: 1rem; font-family: inherit;
+.brand:hover {
+  text-decoration: none;
+  color: var(--color-navy-700);
 }
-.auth-card input:focus { outline: none; border-color: var(--cyan); }
-.auth-card select {
-  display: block; width: 100%; margin-top: .3rem; padding: .6rem .8rem;
-  border: 2px solid var(--line); border-radius: 10px; font-size: 1rem; font-family: inherit;
-  background: #fff;
-}
-.auth-card select:focus { outline: none; border-color: var(--cyan); }
-.auth-card input[readonly] { background: #eef3f8; color: #486581; }
-.form-error { background: #fdecec; color: var(--bad); border-radius: 10px; padding: .4rem .8rem; font-weight: 700; }
-.auth-switch { text-align: center; margin-bottom: 0; }
-/* الجولة الرابعة: أخطاء الحقول، عدّاد قوة كلمة السر، زر Google */
-.field-error { display: block; color: var(--bad); font-size: .88rem; font-weight: 700; margin-top: .25rem; }
-.field-error[hidden] { display: none; }
-.field-hint { display: block; color: var(--muted); font-size: .85rem; font-weight: 400; margin-top: .25rem; }
-.pw-meter { display: block; height: 8px; background: #e3ebf2; border-radius: 4px; margin-top: .4rem; overflow: hidden; }
-.pw-meter-bar { display: block; height: 100%; width: 0; border-radius: 4px; transition: width .25s ease; }
-.pw-meter-bar.s1 { background: #e05252; }
-.pw-meter-bar.s2 { background: #e8a13a; }
-.pw-meter-bar.s3 { background: #37b24d; }
-.pw-label { display: block; font-size: .85rem; font-weight: 700; margin-top: .25rem; color: var(--muted); }
-.btn-google {
-  display: flex; align-items: center; justify-content: center; gap: .6rem;
-  width: 100%; padding: .65rem; background: #fff; color: var(--navy-800);
-  border: 2px solid var(--line); border-radius: 10px; font-size: 1rem;
-  font-weight: 700; font-family: inherit; cursor: pointer;
-}
-.btn-google:hover { border-color: #4285f4; }
-.g-mark { font-family: Arial, sans-serif; font-weight: 800; font-size: 1.25rem; color: #4285f4; }
-.auth-divider {
-  display: flex; align-items: center; gap: .8rem; margin: 1.1rem 0 .3rem;
-  color: var(--muted); font-size: .9rem; font-weight: 700;
-}
-.auth-divider::before, .auth-divider::after { content: ""; flex: 1; border-top: 2px solid var(--line); }
-.google-note {
-  background: #eaf6fd; border: 1px solid var(--line); border-radius: 10px;
-  padding: .55rem .8rem; font-weight: 700;
-}
-
-/* ---------- الصورة الرئيسية ---------- */
-.hero { margin-bottom: 1.4rem; }
-.hero-img {
-  display: block; width: 100%; height: auto;
-  border-radius: var(--radius); box-shadow: var(--shadow);
-}
-
-/* ---------- لوحة المتابعة ---------- */
-.dash-strip {
-  display: flex; gap: 1rem; flex-wrap: wrap; align-items: stretch;
-  background: var(--navy-700); color: #fff; border-radius: var(--radius);
-  padding: 1rem 1.2rem; box-shadow: var(--shadow); margin-bottom: 1.4rem;
-}
-.dash-item { display: flex; flex-direction: column; justify-content: center; min-width: 120px; }
-.dash-item.grow { flex: 1; min-width: 220px; }
-.dash-value { font-size: 1.5rem; font-weight: 800; color: var(--cyan); }
-.dash-label { font-size: .88rem; color: #c9dcea; }
-
-/* ---------- بطاقات المستويات ---------- */
-.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 1.1rem; }
-.level-card {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 1.2rem 1.3rem; color: var(--ink); border-top: 6px solid var(--cyan);
+.brand-logo {
+  height: 46px;
+  width: auto;
+  max-width: 132px;
+  object-fit: contain;
   display: block;
+  flex-shrink: 0;
 }
-.level-card:hover { text-decoration: none; transform: translateY(-3px); transition: .15s; }
-.level-card h2 { margin: .4rem 0; color: var(--navy-700); font-size: 1.2rem; }
-.level-card p { color: var(--muted); margin: .2rem 0 .8rem; }
-.level-card-top { display: flex; justify-content: space-between; align-items: center; }
-.level-head { display: flex; align-items: center; gap: .6rem; }
-.level-icon { width: 52px; height: 52px; object-fit: cover; border-radius: 12px; box-shadow: 0 2px 8px rgba(7, 24, 46, .18); }
-.level-done-badge { color: var(--good); font-weight: 700; margin-top: .6rem; }
-.level-title-row { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.level-title-row .page-title { margin: 0 0 .2rem; }
-.level-title-row .muted { margin: 0; }
-.level-icon-lg { width: 92px; height: 92px; object-fit: cover; border-radius: 16px; box-shadow: var(--shadow); }
-.cert-card { border-top: 6px solid var(--amber); }
-.resume-card { border-top: 6px solid var(--cyan); }
-.level-num { background: var(--navy-700); color: #fff; border-radius: 999px; padding: .05rem .8rem; font-size: .85rem; font-weight: 700; }
-.level-count { color: var(--muted); font-size: .88rem; }
-.progress { background: var(--line); border-radius: 999px; height: 12px; overflow: hidden; }
-.progress.big { height: 16px; }
-.dash-strip .progress { background: rgba(255, 255, 255, .18); }
-.progress-fill { background: linear-gradient(90deg, var(--cyan-dark), var(--cyan)); height: 100%; border-radius: 999px; }
-.progress-label { font-size: .88rem; color: var(--muted); margin-top: .3rem; }
-.dash-strip .progress-label { color: #c9dcea; }
+.brand-text {
+  min-width: 0;
+  border-inline-start: 1px solid var(--color-line);
+  padding-inline-start: var(--space-3);
+}
+.brand-name {
+  display: block;
+  font-size: var(--text-md);
+  font-weight: 800;
+  color: var(--color-navy-700);
+  line-height: 1.35;
+}
+.brand-sub {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  direction: ltr;
+  text-align: right;
+  line-height: 1.4;
+}
+.user-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.header-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  padding: 0.42rem 0.7rem;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.header-nav-link:hover {
+  background: var(--color-bg);
+  color: var(--color-navy-700);
+  text-decoration: none;
+}
+.header-sep {
+  width: 1px;
+  height: 22px;
+  background: var(--color-line);
+  margin-inline: var(--space-1);
+}
+.user-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-cyan-soft);
+  color: var(--color-navy-700);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  padding: 0.32rem 0.85rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.user-name .icon {
+  color: var(--color-cyan-dark);
+}
 
-/* ---------- قائمة الدروس ---------- */
-.lesson-list { display: flex; flex-direction: column; gap: .6rem; margin-top: 1rem; }
-.lesson-row {
-  display: flex; align-items: center; gap: .9rem; background: var(--card);
-  border-radius: 12px; padding: .7rem 1rem; color: var(--ink); box-shadow: 0 2px 10px rgba(7, 24, 46, .06);
-  border: 1px solid var(--line);
+/* ---------- نظام الأزرار الموحّد (One Button System) ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 42px;
+  padding: 0.5rem 1.25rem;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.35;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
-.lesson-row:hover { text-decoration: none; border-color: var(--cyan); }
-.lesson-row.is-done { border-color: #bfe6d6; background: #f4fbf7; }
-.lesson-check {
-  width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%;
-  background: var(--cyan-soft); color: var(--navy-700);
-  display: flex; align-items: center; justify-content: center; font-weight: 800;
+.btn:hover {
+  text-decoration: none;
 }
-.lesson-row.is-done .lesson-check { background: var(--good); color: #fff; }
-.lesson-main { flex: 1; display: flex; flex-direction: column; }
-.lesson-title { font-weight: 700; }
-.lesson-quiz { font-size: .85rem; color: var(--muted); }
-.badge { border-radius: 999px; padding: .1rem .8rem; font-size: .82rem; font-weight: 700; white-space: nowrap; }
-.badge-code { background: #e2e9ff; color: #2b3f9e; }
-.badge-practice { background: #fff2d8; color: #96690a; }
-.badge-project { background: #ffe3ec; color: #a11c4d; }
-.badge-soon { background: #edf1f5; color: var(--muted); }
+.btn[disabled] {
+  opacity: 0.55;
+  cursor: wait;
+}
+.btn-primary {
+  background: var(--color-cyan);
+  color: var(--color-navy-700);
+  border-color: var(--color-cyan);
+  font-weight: 800;
+  box-shadow: 0 2px 10px rgba(34, 195, 230, 0.28);
+}
+.btn-primary:hover {
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  border-color: var(--color-navy-700);
+  box-shadow: var(--shadow-sm);
+}
+.btn-ghost {
+  background: var(--color-white);
+  color: var(--color-navy-700);
+  border-color: var(--color-line);
+}
+.btn-ghost:hover {
+  background: var(--color-cyan-soft);
+  color: var(--color-navy-700);
+  border-color: var(--color-cyan);
+}
+.btn-textlink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-navy-700);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  padding: 0.45rem 0.75rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.btn-textlink:hover {
+  background: var(--color-bg);
+  color: var(--color-cyan-dark);
+  text-decoration: none;
+}
+.btn-signup {
+  padding-inline: 1.15rem;
+}
+.btn-small {
+  min-height: 36px;
+  padding: 0.32rem 0.9rem;
+  font-size: var(--text-sm);
+}
+.btn-lg {
+  min-height: 48px;
+  padding: 0.7rem 1.65rem;
+  font-size: var(--text-md);
+}
+.btn-wide {
+  width: 100%;
+  min-height: 46px;
+}
 
-/* ---------- صفحة الدرس ---------- */
-.lesson-head { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.lesson-goal {
-  background: var(--cyan-soft); border: 1px solid #bfe9f7; border-radius: 12px;
-  padding: .7rem 1rem; font-weight: 600;
+/* ---------- التخطيط العام ونظام البطاقات الموحّد (One Card System) ---------- */
+.page {
+  flex: 1;
+  width: 100%;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-8) var(--space-6) var(--space-16);
+}
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-navy-700);
+  margin: var(--space-2) 0 var(--space-4);
+}
+.page-title .icon {
+  color: var(--color-cyan-dark);
+}
+.crumbs {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  margin: 0 0 var(--space-3);
 }
 .card {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  padding: 1.2rem 1.4rem; margin: 1.1rem 0;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-6);
+  margin: var(--space-5) 0;
 }
-.card h2 { margin-top: 0; color: var(--navy-700); font-size: 1.25rem; }
-.lesson-video { width: 100%; max-height: 520px; background: #000; border-radius: 12px; }
+.card h2 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  color: var(--color-navy-700);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+.card h2 .icon {
+  color: var(--color-cyan-dark);
+}
 
-/* ---- مشغّل يوتيوب الذكي: واجهة خفيفة ثم إطار عند الضغط ---- */
-.yt-facade { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 520px; border-radius: 12px; background-color: #071426; background-size: cover; background-position: center; cursor: pointer; overflow: hidden; }
-.yt-facade::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4, 16, 36, .04), rgba(4, 16, 36, .55)); }
-.yt-facade:focus-visible { outline: 3px solid #0e9bd8; outline-offset: 2px; }
-.yt-badge { position: absolute; top: 12px; inset-inline-start: 12px; z-index: 2; background: rgba(0, 0, 0, .68); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .4px; padding: 4px 11px; border-radius: 999px; }
-.yt-play { position: absolute; bottom: 48px; left: 50%; transform: translateX(-50%); width: 64px; height: 64px; border-radius: 50%; background: #0e9bd8; box-shadow: 0 10px 30px rgba(0, 0, 0, .45), 0 0 0 6px rgba(255, 255, 255, .25); z-index: 2; transition: transform .15s ease; }
-.yt-play::before { content: ""; position: absolute; top: 50%; left: 54%; transform: translate(-50%, -50%); border-style: solid; border-width: 11px 0 11px 19px; border-color: transparent transparent transparent #fff; }
-.yt-facade:hover .yt-play, .yt-facade:focus-visible .yt-play { transform: translateX(-50%) scale(1.07); }
-.yt-facade-label { position: absolute; bottom: 12px; inset-inline: 0; z-index: 2; text-align: center; color: #fff; font-weight: 700; text-shadow: 0 1px 6px rgba(0, 0, 0, .65); padding: 0 12px; }
-.yt-frame-wrap { position: relative; width: 100%; aspect-ratio: 16 / 9; max-height: 520px; border-radius: 12px; overflow: hidden; background: #000; }
-.yt-frame { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-.nice-list { padding-inline-start: 1.3rem; }
-.nice-list li { margin: .3rem 0; }
-.code-head { display: flex; align-items: center; gap: .8rem; margin-bottom: .5rem; }
+/* ---------- صفحة الاستقبال العامة (Landing Page — Edraak MOOC Structure) ---------- */
+.landing-section {
+  margin: 0 0 var(--space-10);
+}
+.section-head {
+  margin-bottom: var(--space-5);
+}
+.section-head .page-title {
+  margin: 0 0 var(--space-2);
+  position: relative;
+  padding-inline-start: var(--space-3);
+}
+.section-head .page-title::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.2em;
+  bottom: 0.2em;
+  width: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-cyan);
+}
+.landing-track-note,
+.landing-tracks-intro {
+  color: var(--color-muted);
+  max-width: 780px;
+  margin: 0;
+}
+
+/* القسم الافتتاحي (Hero) — تدرج فاتح + نمط دوائر إلكترونية أوضح */
+.landing-hero {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-white);
+  background-image:
+    var(--pattern-circuit-hero),
+    linear-gradient(135deg, var(--color-white) 0%, var(--color-cyan-soft) 54%, var(--color-bg) 100%);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-8) var(--space-8) var(--space-6);
+  margin-bottom: var(--space-10);
+}
+.hero-circuit-ornament {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  width: 100%;
+  height: 260px;
+  color: rgba(11, 110, 140, 0.11);
+  pointer-events: none;
+  z-index: 0;
+}
+.landing-hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+.landing-hero-copy {
+  text-align: right;
+}
+.landing-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  box-shadow: var(--shadow-xs);
+  margin-bottom: var(--space-4);
+}
+.landing-logo {
+  display: block;
+  height: 52px;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+}
+.landing-hero h1 {
+  color: var(--color-navy-700);
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  line-height: 1.42;
+  margin: 0 0 var(--space-4);
+}
+.landing-promise {
+  color: var(--color-ink);
+  font-size: 1.06rem;
+  line-height: var(--leading-body);
+  margin: 0 0 var(--space-5);
+}
+.landing-ctas {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 var(--space-3);
+}
+.landing-browse-row {
+  margin: 0 0 var(--space-3);
+}
+.landing-browse {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-cyan-dark);
+  font-weight: 700;
+  font-size: var(--text-base);
+  padding: var(--space-1) 0;
+}
+.landing-browse:hover {
+  color: var(--color-navy-700);
+  text-decoration: underline;
+}
+.landing-free {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  margin: 0;
+}
+.landing-free .icon {
+  color: var(--color-cyan-dark);
+}
+.landing-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+.landing-hero-frame {
+  width: 100%;
+  background: var(--color-navy-700);
+  border-radius: var(--radius-lg);
+  padding: 6px;
+  border: 2px solid rgba(34, 195, 230, 0.45);
+  box-shadow: var(--shadow-lg);
+}
+.landing-hero-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+/* شريط الإحصاءات في الهيرو (4 أعمدة متوازنة) */
+.landing-stats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.landing-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-inline: var(--space-2);
+  border-inline-start: 1px solid var(--color-line);
+}
+.landing-stat:first-child {
+  border-inline-start: none;
+}
+.landing-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+  margin-bottom: var(--space-2);
+}
+.landing-stat-num {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--color-navy-700);
+  line-height: 1.25;
+}
+.landing-stat-label {
+  color: var(--color-muted);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-top: 2px;
+}
+
+/* قسم عن الأكاديمية */
+.landing-about {
+  border-inline-start: 4px solid var(--color-cyan);
+}
+.about-parents-callout {
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  margin-top: var(--space-4);
+  color: var(--color-navy-700);
+}
+
+/* قسم «لماذا أكاديميتنا؟» — شبكة خماسية متساوية بلا بطاقة يتيمة */
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-4);
+}
+.landing-feature {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-top: 3px solid var(--color-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+.landing-feature-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-md);
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-feature-label {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-navy-700);
+  line-height: var(--leading-snug);
+}
+
+/* قسم «مسارات الأكاديمية» — شبكة رباعية متساوية */
+.landing-track-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+.landing-track-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-top: 3px solid var(--color-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.landing-track-card.is-live {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.landing-track-card.is-live:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-md);
+}
+.landing-track-card.is-soon {
+  background: rgba(255, 255, 255, 0.72);
+  border-style: dashed;
+  border-top: 3px solid var(--color-line);
+  box-shadow: none;
+}
+.track-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+.track-icon-box {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.landing-track-card.is-soon .track-icon-box {
+  background: var(--color-bg);
+  color: var(--color-muted);
+}
+.landing-track-card h3 {
+  color: var(--color-navy-700);
+  margin: var(--space-1) 0;
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+.landing-track-card.is-soon h3 {
+  color: var(--color-muted);
+}
+.landing-track-desc {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+.landing-track-card.is-live .landing-track-desc {
+  color: var(--color-ink);
+}
+.track-badge {
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.7rem;
+  font-size: var(--text-xs);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.track-badge-live {
+  background: var(--color-cyan);
+  color: var(--color-navy-700);
+}
+.track-badge-soon {
+  background: var(--color-bg);
+  color: var(--color-muted);
+  border: 1px solid var(--color-line);
+}
+.landing-track-meta {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-line);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--color-navy-700);
+}
+.landing-track-action {
+  margin-top: auto;
+  padding-top: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--color-cyan-dark);
+}
+
+/* قسم «المستويات والدورات» — بطاقات كتالوج الدورات (Edraak Course Cards) */
+.landing-level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+.landing-level-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.landing-level-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-md);
+}
+.landing-cover-wrap {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-navy-700);
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-line);
+}
+.landing-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.25s ease;
+}
+.landing-level-card:hover .landing-cover {
+  transform: scale(1.03);
+}
+.landing-card-body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+.landing-level-card h3 {
+  color: var(--color-navy-700);
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+.landing-desc {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  margin: 0;
+}
+.landing-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: 0;
+}
+.landing-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-bg);
+  color: var(--color-navy-700);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.7rem;
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+.landing-count .icon {
+  color: var(--color-cyan-dark);
+}
+.landing-cert {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.7rem;
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+.landing-syllabus {
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.85rem;
+}
+.landing-syllabus summary {
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-cyan-dark);
+  user-select: none;
+}
+.landing-syllabus summary:hover {
+  color: var(--color-navy-700);
+}
+.landing-syllabus ol {
+  margin: var(--space-2) 0 0;
+  padding-inline-start: 1.3rem;
+  font-size: var(--text-sm);
+  line-height: 1.85;
+  color: var(--color-ink);
+}
+.landing-provider {
+  margin: auto 0 0;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-line);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+/* قسم «كيف يعمل؟» — شبكة خطوات مرقّمة واضحة */
+.steps-list {
+  list-style: none;
+  counter-reset: academy-step;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+.steps-list li {
+  counter-increment: academy-step;
+  position: relative;
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  padding-inline-start: 3.4rem;
+  line-height: 1.75;
+}
+.steps-list li::before {
+  content: counter(academy-step);
+  position: absolute;
+  inset-inline-start: var(--space-4);
+  top: var(--space-4);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--color-navy-700);
+  color: var(--color-cyan);
+  font-weight: 800;
+  font-size: var(--text-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* كتلة الشهادات في صفحة الاستقبال */
+.landing-certs {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+.landing-cert-stage {
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+.landing-cert-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+.landing-cert-text h2 {
+  margin-top: 0;
+}
+
+/* بانر الختام في صفحة الاستقبال */
+.landing-outro {
+  background: linear-gradient(135deg, var(--color-navy-700) 0%, var(--color-navy-600) 100%);
+  color: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 0;
+}
+.landing-outro-title {
+  font-size: var(--text-xl);
+  font-weight: 800;
+  color: var(--color-white);
+  margin: 0 0 var(--space-4);
+}
+.landing-outro .landing-ctas {
+  justify-content: center;
+  margin-bottom: 0;
+}
+.landing-outro .btn-primary:hover {
+  background: var(--color-white);
+  color: var(--color-navy-700);
+  border-color: var(--color-white);
+}
+
+/* ---------- التذييل الكحلي الغني (Rich Navy Footer) ---------- */
+.site-footer {
+  background: linear-gradient(180deg, var(--color-navy-700) 0%, var(--color-navy-600) 100%);
+  color: var(--color-cyan-soft);
+  border-top: 3px solid var(--color-cyan);
+  margin-top: auto;
+}
+.footer-inner {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: var(--space-10) var(--space-6) var(--space-6);
+}
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1.15fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+.footer-brand-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-white);
+  font-size: var(--text-md);
+  font-weight: 800;
+  margin-bottom: var(--space-3);
+}
+.footer-brand-title .icon {
+  color: var(--color-cyan);
+}
+.footer-desc {
+  color: var(--color-cyan-soft);
+  font-size: var(--text-sm);
+  line-height: 1.8;
+  margin: 0 0 var(--space-4);
+}
+.footer-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(34, 195, 230, 0.35);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-white);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  margin: 0;
+}
+.footer-credit .icon {
+  color: var(--color-cyan);
+}
+.footer-heading {
+  color: var(--color-white);
+  font-size: var(--text-base);
+  font-weight: 800;
+  margin: 0 0 var(--space-3);
+}
+.footer-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.footer-link-list a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-cyan-soft);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.footer-link-list a:hover {
+  color: var(--color-cyan);
+  text-decoration: underline;
+}
+.footer-channel-note {
+  color: var(--color-cyan-soft);
+  font-size: var(--text-sm);
+  line-height: 1.75;
+  margin: 0 0 var(--space-3);
+}
+.footer-yt-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: rgba(34, 195, 230, 0.14);
+  color: var(--color-white);
+  border: 1.5px solid var(--color-cyan);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1.05rem;
+  font-size: var(--text-sm);
+  font-weight: 800;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.footer-yt-btn .icon {
+  color: var(--color-cyan);
+}
+.footer-yt-btn:hover {
+  background: var(--color-cyan);
+  color: var(--color-navy-700);
+  text-decoration: none;
+}
+.footer-yt-btn:hover .icon {
+  color: var(--color-navy-700);
+}
+.footer-bottom {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(215, 227, 238, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  font-size: var(--text-xs);
+  color: var(--color-cyan-soft);
+}
+.footer-bottom-credit {
+  color: var(--color-cyan);
+  font-weight: 700;
+}
+
+/* ---------- استمارات الدخول والتسجيل والاستعادة ---------- */
+.auth-card {
+  max-width: 500px;
+  margin: var(--space-6) auto;
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-top: 4px solid var(--color-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-8);
+}
+.auth-card h1 {
+  margin: 0 0 var(--space-3);
+  color: var(--color-navy-700);
+  font-size: 1.45rem;
+}
+.auth-card label {
+  display: block;
+  margin: var(--space-4) 0;
+  font-weight: 700;
+  color: var(--color-navy-700);
+}
+.auth-card input,
+.auth-card select {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-1);
+  padding: 0.62rem 0.85rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-family: inherit;
+  color: var(--color-ink);
+  background: var(--color-white);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.auth-card input:focus,
+.auth-card select:focus {
+  outline: none;
+  border-color: var(--color-cyan-dark);
+  box-shadow: 0 0 0 3px rgba(34, 195, 230, 0.22);
+}
+.auth-card input[readonly] {
+  background: var(--color-bg);
+  color: var(--color-muted);
+}
+.form-error {
+  background: var(--color-bad-bg);
+  color: var(--color-bad);
+  border: 1px solid var(--color-bad-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 700;
+}
+.auth-switch {
+  text-align: center;
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+}
+.field-error {
+  display: block;
+  color: var(--color-bad);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  margin-top: var(--space-1);
+}
+.field-error[hidden] {
+  display: none;
+}
+.field-hint {
+  display: block;
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  margin-top: var(--space-1);
+}
+.pw-meter {
+  display: block;
+  height: 8px;
+  background: var(--color-line);
+  border-radius: var(--radius-pill);
+  margin-top: var(--space-2);
+  overflow: hidden;
+}
+.pw-meter-bar {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: var(--radius-pill);
+  transition: width 0.25s ease;
+}
+.pw-meter-bar.s0,
+.pw-meter-bar.s1 {
+  background: var(--color-bad);
+}
+.pw-meter-bar.s2 {
+  background: var(--color-cyan);
+}
+.pw-meter-bar.s3 {
+  background: var(--color-good);
+}
+.pw-label {
+  display: block;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-top: var(--space-1);
+  color: var(--color-muted);
+}
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem;
+  background: var(--color-white);
+  color: var(--color-navy-700);
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.btn-google:hover {
+  background: var(--color-cyan-soft);
+  border-color: var(--color-cyan);
+}
+.g-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+  font-family: Arial, sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 var(--space-2);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--color-line);
+}
+.google-note {
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+}
+.rec-check {
+  font-weight: 600;
+}
+.rec-check input {
+  display: inline-block;
+  width: auto;
+  margin: 0 var(--space-1);
+}
+
+/* ---------- الصفحة الرئيسية للتلميذ ولوحة المتابعة ---------- */
+.hero {
+  margin-bottom: var(--space-6);
+}
+.hero-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-md);
+}
+.dash-strip {
+  display: flex;
+  gap: var(--space-5);
+  flex-wrap: wrap;
+  align-items: stretch;
+  background: linear-gradient(135deg, var(--color-navy-700) 0%, var(--color-navy-600) 100%);
+  color: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
+}
+.dash-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 120px;
+}
+.dash-item.grow {
+  flex: 1;
+  min-width: 220px;
+}
+.dash-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--color-cyan);
+  line-height: 1.3;
+}
+.dash-label {
+  font-size: var(--text-sm);
+  color: var(--color-cyan-soft);
+}
+
+/* ---------- بطاقات المستويات (للتلميذ المسجّل) ---------- */
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+.level-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-top: 3px solid var(--color-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+  color: var(--color-ink);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.level-card:hover {
+  text-decoration: none;
+  color: var(--color-ink);
+  transform: translateY(-3px);
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-md);
+}
+.level-card h2 {
+  margin: var(--space-3) 0 var(--space-1);
+  color: var(--color-navy-700);
+  font-size: var(--text-md);
+  font-weight: 800;
+}
+.level-card p {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-4);
+  flex: 1;
+}
+.level-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+}
+.level-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.level-icon {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-xs);
+}
+.level-done-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--color-good);
+  background: var(--color-good-bg);
+  border: 1px solid var(--color-good-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  margin-top: var(--space-3);
+}
+.level-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+.level-title-row .page-title {
+  margin: 0 0 var(--space-1);
+}
+.level-title-row .muted {
+  margin: 0;
+}
+.level-icon-lg {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.cert-card,
+.resume-card,
+.backup-card {
+  border-top: 3px solid var(--color-cyan);
+}
+.level-num {
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  border-radius: var(--radius-pill);
+  padding: 0.12rem 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.level-count {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+.progress {
+  background: var(--color-line);
+  border-radius: var(--radius-pill);
+  height: 10px;
+  overflow: hidden;
+}
+.progress.big {
+  height: 14px;
+}
+.dash-strip .progress {
+  background: rgba(255, 255, 255, 0.18);
+  margin-bottom: var(--space-1);
+}
+.progress-fill {
+  background: linear-gradient(90deg, var(--color-cyan-dark), var(--color-cyan));
+  height: 100%;
+  border-radius: var(--radius-pill);
+}
+.progress-label {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-top: var(--space-2);
+}
+.dash-strip .progress-label {
+  color: var(--color-cyan-soft);
+}
+
+/* ---------- قائمة الدروس والشارات الموحّدة ---------- */
+.lesson-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.lesson-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+.lesson-row:hover {
+  text-decoration: none;
+  color: var(--color-ink);
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.lesson-row.is-done {
+  border-color: var(--color-good-line);
+  background: var(--color-good-bg);
+}
+.lesson-check {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 50%;
+  background: var(--color-cyan-soft);
+  color: var(--color-navy-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: var(--text-sm);
+}
+.lesson-row.is-done .lesson-check {
+  background: var(--color-good);
+  color: var(--color-white);
+}
+.lesson-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lesson-title {
+  font-weight: 700;
+  color: var(--color-navy-700);
+}
+.lesson-quiz {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+.lesson-quiz .icon {
+  color: var(--color-cyan-dark);
+}
+.badge {
+  border-radius: var(--radius-pill);
+  padding: 0.15rem 0.75rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge-code {
+  background: var(--color-cyan-soft);
+  color: var(--color-cyan-dark);
+}
+.badge-practice {
+  background: var(--color-bg);
+  color: var(--color-navy-600);
+  border: 1px solid var(--color-line);
+}
+.badge-project {
+  background: var(--color-navy-700);
+  color: var(--color-white);
+}
+.badge-soon {
+  background: var(--color-bg);
+  color: var(--color-muted);
+}
+
+/* ---------- صفحة الدرس ومشغّل الفيديو ---------- */
+.lesson-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.lesson-goal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-inline-start: 4px solid var(--color-cyan);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+  color: var(--color-navy-700);
+}
+.lesson-goal .icon {
+  color: var(--color-cyan-dark);
+}
+.lesson-video {
+  width: 100%;
+  max-height: 520px;
+  background: var(--color-navy-700);
+  border-radius: var(--radius-sm);
+}
+.yt-facade {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 520px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-navy-700);
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  overflow: hidden;
+}
+.yt-facade::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 34, 66, 0.08), rgba(10, 34, 66, 0.62));
+}
+.yt-facade:focus-visible {
+  outline: 3px solid var(--color-cyan-dark);
+  outline-offset: 2px;
+}
+.yt-badge {
+  position: absolute;
+  top: 12px;
+  inset-inline-start: 12px;
+  z-index: 2;
+  background: rgba(10, 34, 66, 0.82);
+  color: var(--color-white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 4px 11px;
+  border-radius: var(--radius-pill);
+}
+.yt-play {
+  position: absolute;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-cyan);
+  box-shadow: 0 10px 30px rgba(10, 34, 66, 0.48), 0 0 0 6px rgba(255, 255, 255, 0.28);
+  z-index: 2;
+  transition: transform 0.15s ease;
+}
+.yt-play::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 54%;
+  transform: translate(-50%, -50%);
+  border-style: solid;
+  border-width: 11px 0 11px 19px;
+  border-color: transparent transparent transparent var(--color-navy-700);
+}
+.yt-facade:hover .yt-play,
+.yt-facade:focus-visible .yt-play {
+  transform: translateX(-50%) scale(1.07);
+}
+.yt-facade-label {
+  position: absolute;
+  bottom: 12px;
+  inset-inline: 0;
+  z-index: 2;
+  text-align: center;
+  color: var(--color-white);
+  font-weight: 700;
+  text-shadow: 0 1px 6px rgba(10, 34, 66, 0.75);
+  padding: 0 12px;
+}
+.yt-frame-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 520px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-navy-700);
+}
+.yt-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.nice-list {
+  padding-inline-start: 1.35rem;
+  margin: 0;
+}
+.nice-list li {
+  margin: var(--space-1) 0;
+}
+.code-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
 .code-block {
-  background: var(--navy-900); color: #d6f4ff; border-radius: 12px;
-  padding: 1rem 1.2rem; overflow-x: auto; font-size: .95rem; line-height: 1.65;
-  direction: ltr; text-align: left; margin: 0;
+  background: var(--color-navy-700);
+  color: var(--color-cyan-soft);
+  border: 1px solid var(--color-navy-600);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4) var(--space-5);
+  overflow-x: auto;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  direction: ltr;
+  text-align: left;
+  margin: 0;
 }
-.code-block code { font-family: Consolas, "Courier New", monospace; white-space: pre; }
-.soon-card { border: 2px dashed var(--cyan); background: #f4fbfe; }
-.done-card { border-top: 6px solid var(--good); }
-.lesson-nav { display: flex; justify-content: space-between; gap: .8rem; margin-top: 1.4rem; flex-wrap: wrap; }
+.code-block code {
+  font-family: var(--font-mono);
+  white-space: pre;
+}
+.soon-card {
+  border: 2px dashed var(--color-cyan);
+  background: var(--color-cyan-soft);
+}
+.done-card {
+  border-top: 3px solid var(--color-good);
+}
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  flex-wrap: wrap;
+}
 
-/* ---------- الاختبار ---------- */
-.quiz-q { border: 1px solid var(--line); border-radius: 12px; margin: 0 0 1rem; padding: .8rem 1rem 1rem; }
-.quiz-q legend { font-weight: 700; padding: 0 .4rem; }
-.quiz-opt { display: block; padding: .35rem .6rem; border-radius: 8px; cursor: pointer; }
-.quiz-opt:hover { background: var(--cyan-soft); }
-.quiz-feedback { font-weight: 700; margin: .5rem 0 0; }
-.quiz-feedback.ok { color: var(--good); }
-.quiz-feedback.bad { color: var(--bad); }
-.quiz-result { font-weight: 800; font-size: 1.1rem; color: var(--navy-700); }
-.quiz-result.ok { color: var(--good); }
-.quiz-result.bad { color: var(--bad); }
-.quiz-result.warn { color: #9a6a00; }
-.done-status.ok { color: var(--good); font-weight: 700; }
+/* ---------- الاختبارات (Quizzes) ---------- */
+.quiz-q {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  margin: 0 0 var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: var(--color-bg);
+}
+.quiz-q legend {
+  font-weight: 700;
+  color: var(--color-navy-700);
+  padding: 0 var(--space-2);
+}
+.quiz-opt {
+  display: block;
+  padding: 0.4rem 0.65rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+.quiz-opt:hover {
+  background: var(--color-cyan-soft);
+}
+.quiz-feedback {
+  font-weight: 700;
+  margin: var(--space-2) 0 0;
+}
+.quiz-feedback.ok {
+  color: var(--color-good);
+}
+.quiz-feedback.bad {
+  color: var(--color-bad);
+}
+.quiz-feedback.stale {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+.quiz-result {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--color-navy-700);
+  margin-top: var(--space-3);
+}
+.quiz-result.ok {
+  color: var(--color-good);
+}
+.quiz-result.bad {
+  color: var(--color-bad);
+}
+.quiz-result.warn {
+  color: var(--color-cyan-dark);
+}
+.quiz-stale-note {
+  color: var(--color-cyan-dark);
+  font-weight: 700;
+}
+.done-status.ok {
+  color: var(--color-good);
+  font-weight: 700;
+}
 
-/* ---------- التجربة التفاعلية ---------- */
-.exp-box { display: flex; gap: 1.6rem; align-items: center; flex-wrap: wrap; }
-.exp-led-wrap { text-align: center; }
+/* ---------- التجارب التفاعلية وملعب الكود ---------- */
+.exp-box {
+  display: flex;
+  gap: var(--space-6);
+  align-items: center;
+  flex-wrap: wrap;
+}
+.exp-led-wrap {
+  text-align: center;
+}
 .exp-led {
-  width: 110px; height: 110px; border-radius: 50%;
-  background: #31435a; border: 6px solid var(--navy-700);
-  margin: 0 auto; transition: background .08s, box-shadow .08s;
+  width: 108px;
+  height: 108px;
+  border-radius: 50%;
+  background: var(--color-navy-600);
+  border: 6px solid var(--color-navy-700);
+  margin: 0 auto;
+  transition: background 0.08s ease, box-shadow 0.08s ease;
 }
-.exp-led.on { background: #ffd23e; box-shadow: 0 0 45px 12px rgba(255, 210, 62, .65); }
-.exp-led-label { margin-top: .5rem; font-weight: 700; color: var(--muted); }
-.exp-controls { flex: 1; min-width: 260px; }
-.exp-controls input[type="range"] { width: 100%; accent-color: var(--cyan-dark); }
-
-/* ---------- شهادة إتمام المستوى ---------- */
-.certificate-sheet {
-  position: relative; max-width: 1000px; margin: 0 auto;
-  border-radius: 12px; overflow: hidden; box-shadow: var(--shadow);
-  background: #fdf8ec;
+.exp-led.on {
+  background: var(--color-cyan);
+  box-shadow: 0 0 42px 12px rgba(34, 195, 230, 0.6);
 }
-.certificate-bg { display: block; width: 100%; height: auto; }
-.certificate-body {
-  position: absolute; inset: 12% 11%;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  text-align: center; color: var(--navy-800); line-height: 1.6;
+.exp-led-label {
+  margin-top: var(--space-2);
+  font-weight: 700;
+  color: var(--color-muted);
 }
-.certificate-body p { margin: .15rem 0; }
-.cert-academy { font-weight: 700; color: var(--cyan-dark); font-size: clamp(.8rem, 2.2vw, 1.05rem); }
-.cert-title { font-size: clamp(1.5rem, 4.5vw, 2.6rem); color: var(--navy-700); margin: .3rem 0 .5rem; }
-.cert-line { font-size: clamp(.9rem, 2.4vw, 1.1rem); }
-.cert-name {
-  font-size: clamp(1.3rem, 4vw, 2.1rem); font-weight: 800; color: var(--navy-800);
-  border-bottom: 3px solid var(--amber); padding: 0 1.4rem .1rem; margin: .2rem 0 .4rem !important;
+.exp-controls {
+  flex: 1;
+  min-width: 260px;
 }
-.cert-level { font-size: clamp(1.05rem, 3vw, 1.5rem); font-weight: 800; color: var(--navy-700); }
-.cert-date { color: var(--muted); font-size: clamp(.85rem, 2.2vw, 1rem); margin-top: .6rem !important; }
-.cert-credit { font-weight: 700; color: var(--navy-700); font-size: clamp(.85rem, 2.2vw, 1rem); }
-.cert-print-row { display: flex; gap: .8rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap; }
-
-@page { size: A4 landscape; margin: 0; }
-@media print {
-  .site-header, .site-footer, .cert-actions { display: none !important; }
-  body { background: #fff; }
-  .page { max-width: none; margin: 0; padding: 0; }
-  .certificate-sheet {
-    max-width: none; width: 297mm; height: 210mm;
-    border-radius: 0; box-shadow: none; margin: 0;
-  }
-  .certificate-bg { width: 100%; height: 100%; object-fit: fill; }
-  .certificate-body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.exp-controls input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-cyan-dark);
 }
-
-/* ---------- رابط تجاوز الترويسة (للوحة المفاتيح وقارئات الشاشة) ---------- */
-.skip-link {
-  position: absolute; inset-inline-start: 1rem; top: -120px; z-index: 60;
-  background: var(--navy-800); color: #fff; font-weight: 700;
-  padding: .6rem 1.2rem; border-radius: 0 0 12px 12px;
-  box-shadow: var(--shadow); transition: top .15s;
-}
-.skip-link:focus { top: 0; color: #fff; }
-main[tabindex="-1"]:focus { outline: none; }
-.btn[disabled] { opacity: .55; cursor: wait; }
-.rec-check { font-weight: 600; }
-.rec-check input { display: inline-block; width: auto; margin: 0 .3rem; }
-
-/* ---------- بطاقة النسخة الاحتياطية ---------- */
-.backup-card { border-top: 6px solid var(--amber); }
-.backup-actions { display: flex; gap: .8rem; flex-wrap: wrap; align-items: center; }
-.backup-actions label.btn { margin: 0; }
-
-/* ---------- خطوات التجارب وتصحيح قديم ---------- */
 .exp-steps {
-  background: var(--cyan-soft); border: 1px solid #bfe9f7; border-radius: 10px;
-  padding: .5rem .9rem; margin-top: 0;
+  background: var(--color-cyan-soft);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  margin-top: 0;
 }
-.exp-predict { display: flex; gap: .5rem; flex-wrap: wrap; margin: .4rem 0 .9rem; }
-.exp-predict .pred-chosen { background: var(--cyan); color: var(--navy-900); border-color: var(--cyan-dark); }
-.exp-explain { background: #f4fbf7; border: 1px solid #bfe6d6; border-radius: 10px; padding: .6rem .9rem; }
-.quiz-feedback.stale { color: var(--muted); font-weight: 600; }
-.quiz-stale-note { color: #9a6a00; font-weight: 700; }
+.exp-predict {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin: var(--space-2) 0 var(--space-4);
+}
+.exp-predict .pred-chosen {
+  background: var(--color-cyan);
+  color: var(--color-navy-700);
+  border-color: var(--color-cyan-dark);
+}
+.exp-explain {
+  background: var(--color-good-bg);
+  border: 1px solid var(--color-good-line);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+}
+.exp-guide {
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+.para-flash {
+  background: var(--color-cyan-soft);
+  border-radius: var(--radius-xs);
+  transition: background 1.2s ease;
+}
+.fb-section-link {
+  margin-inline-start: var(--space-2);
+}
+.backup-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: center;
+  margin: var(--space-3) 0;
+}
+.backup-actions label.btn {
+  margin: 0;
+}
+.playground-card {
+  border-top: 3px solid var(--color-navy-700);
+}
+.pg-label {
+  display: block;
+  margin: var(--space-3) 0;
+  font-weight: 700;
+  color: var(--color-navy-700);
+}
+.pg-input {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  border: 1px solid var(--color-navy-600);
+  border-radius: var(--radius-sm);
+  background: var(--color-navy-700);
+  color: var(--color-cyan-soft);
+  text-align: left;
+}
+.pg-input::placeholder {
+  color: rgba(227, 246, 252, 0.55);
+}
+.pool-card {
+  border: 1.5px dashed var(--color-cyan-dark);
+}
+.pool-kind {
+  display: inline-block;
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  border-radius: var(--radius-pill);
+  padding: 0.08rem 0.65rem;
+  font-size: var(--text-xs);
+  margin-inline-end: var(--space-1);
+}
 
-/* ---------- تقليل الحركة (تفضيل نظام التشغيل) ---------- */
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .btn, .level-card, .exp-led, .skip-link { transition: none; }
-  .level-card:hover { transform: none; }
+/* ---------- مركز الأستاذ والجداول والمزامنة ---------- */
+.table-wrap {
+  overflow-x: auto;
+}
+.class-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+.class-table th,
+.class-table td {
+  border: 1px solid var(--color-line);
+  padding: var(--space-2) var(--space-3);
+  text-align: right;
+  vertical-align: top;
+}
+.class-table thead th {
+  background: var(--color-navy-700);
+  color: var(--color-white);
+  font-weight: 700;
+}
+.class-table tbody tr:nth-child(even) {
+  background: var(--color-bg);
+}
+.drop-zone {
+  border: 2px dashed var(--color-cyan-dark);
+  border-radius: var(--radius-md);
+  background: var(--color-cyan-soft);
+  padding: var(--space-6);
+  text-align: center;
+  margin: var(--space-4) 0;
+}
+.drop-zone.drag-over {
+  background: var(--color-bg);
+  border-color: var(--color-navy-700);
+}
+.drop-zone-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-navy-700);
+  margin: 0 0 var(--space-3);
+}
+.drop-zone-text .icon {
+  color: var(--color-cyan-dark);
+}
+.teacher-controls {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-4);
+}
+.teacher-controls label {
+  display: block;
+  font-weight: 700;
+  color: var(--color-navy-700);
+  flex: 1 1 180px;
+}
+.teacher-controls input,
+.teacher-controls select {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-1);
+  padding: 0.55rem 0.8rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-base);
+  font-family: inherit;
+  background: var(--color-white);
+  color: var(--color-ink);
+}
+.teacher-controls input:focus,
+.teacher-controls select:focus {
+  outline: none;
+  border-color: var(--color-cyan-dark);
+  box-shadow: 0 0 0 3px rgba(34, 195, 230, 0.22);
+}
+.provider-badge {
+  display: inline-block;
+  background: var(--color-cyan-soft);
+  color: var(--color-navy-700);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  padding: 0.08rem 0.65rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+.student-info th {
+  text-align: start;
+  width: 180px;
+}
+.sync-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 34, 66, 0.58);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 4vh var(--space-4);
+  z-index: 1000;
+  overflow-y: auto;
+}
+.sync-panel {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-top: 4px solid var(--color-cyan);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  max-width: 640px;
+  width: 100%;
+  padding: var(--space-6);
+}
+.sync-panel h2 {
+  margin-top: 0;
+  color: var(--color-navy-700);
+}
+.sync-auto {
+  margin-top: var(--space-4);
+  border-top: 1px solid var(--color-line);
+  padding-top: var(--space-3);
+}
+.sync-auto-state {
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+}
+.sync-auto-toggle {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  font-weight: 400;
+  cursor: pointer;
+  margin: 0;
+}
+.sync-auto-toggle input {
+  margin-top: 0.3rem;
+}
+
+/* ---------- شهادة إتمام المستوى والطباعة ---------- */
+.certificate-sheet {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background: var(--color-white);
+}
+.certificate-bg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.certificate-body {
+  position: absolute;
+  inset: 12% 11%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--color-navy-700);
+  line-height: 1.6;
+}
+.certificate-body p {
+  margin: 0.15rem 0;
+}
+.cert-academy {
+  font-weight: 700;
+  color: var(--color-cyan-dark);
+  font-size: clamp(0.8rem, 2.2vw, 1.05rem);
+}
+.cert-title {
+  font-size: clamp(1.5rem, 4.5vw, 2.6rem);
+  color: var(--color-navy-700);
+  margin: 0.3rem 0 0.5rem;
+}
+.cert-line {
+  font-size: clamp(0.9rem, 2.4vw, 1.1rem);
+}
+.cert-name {
+  font-size: clamp(1.3rem, 4vw, 2.1rem);
+  font-weight: 800;
+  color: var(--color-navy-700);
+  border-bottom: 3px solid var(--color-cyan);
+  padding: 0 1.4rem 0.1rem;
+  margin: 0.2rem 0 0.4rem !important;
+}
+.cert-level {
+  font-size: clamp(1.05rem, 3vw, 1.5rem);
+  font-weight: 800;
+  color: var(--color-navy-700);
+}
+.cert-date {
+  color: var(--color-muted);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  margin-top: 0.6rem !important;
+}
+.cert-credit {
+  font-weight: 700;
+  color: var(--color-navy-700);
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+}
+.cert-print-row {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-5);
+  flex-wrap: wrap;
+}
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+@media print {
+  .site-header,
+  .site-footer,
+  .cert-actions,
+  .skip-link {
+    display: none !important;
+  }
+  body {
+    background: var(--color-white);
+  }
+  .page {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+  .certificate-sheet {
+    max-width: none;
+    width: 297mm;
+    height: 210mm;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
+  }
+  .certificate-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+  .certificate-body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* ---------- استجابة الشاشات (Responsive Grids) ---------- */
+@media (max-width: 980px) {
+  .landing-hero-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+  .landing-features {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .landing-track-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-level-grid,
+  .level-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .landing-certs {
+    grid-template-columns: 1fr;
+  }
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 640px) {
-  .brand-name { font-size: .98rem; }
-  .brand-logo { width: 50px; height: 50px; }
-  .page { padding: 1rem .8rem 2rem; }
-  .card { padding: 1rem; }
-  .lesson-row { flex-wrap: wrap; }
-  /* الشهادة على الشاشات الضيقة: محتوى في التدفق العادي فوق بطاقة بلون الورق
-     بدل تراكب مطلق فوق الصورة قد يقصّ النص والأسماء الطويلة */
-  .certificate-sheet { overflow: visible; border: 2px solid var(--amber); }
-  .certificate-bg { display: none; }
-  .certificate-body { position: static; padding: 1.4rem 1rem; }
+  .header-inner {
+    padding: var(--space-3) var(--space-4);
+  }
+  .brand-logo {
+    height: 38px;
+  }
+  .brand-name {
+    font-size: 0.96rem;
+  }
+  .brand-sub {
+    display: none;
+  }
+  .header-sep {
+    display: none;
+  }
+  .page {
+    padding: var(--space-5) var(--space-4) var(--space-12);
+  }
+  .landing-hero {
+    padding: var(--space-5) var(--space-4);
+  }
+  .landing-stats {
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--space-4);
+  }
+  .landing-stat {
+    border-inline-start: none;
+    padding: var(--space-2);
+  }
+  .landing-features,
+  .landing-track-grid,
+  .landing-level-grid,
+  .level-grid,
+  .steps-list,
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+  .card,
+  .auth-card {
+    padding: var(--space-5) var(--space-4);
+  }
+  .lesson-row {
+    flex-wrap: wrap;
+  }
+  .certificate-sheet {
+    overflow: visible;
+    border: 2px solid var(--color-cyan);
+  }
+  .certificate-bg {
+    display: none;
+  }
+  .certificate-body {
+    position: static;
+    padding: var(--space-6) var(--space-4);
+  }
 }
 
-/* ---------- الجولة الثالثة: لوحة الأستاذ / ملعب الكود / التدريب / المزامنة ---------- */
-.table-wrap { overflow-x: auto; }
-.class-table { width: 100%; border-collapse: collapse; font-size: .95rem; }
-.class-table th, .class-table td { border: 1px solid var(--line); padding: .45rem .6rem; text-align: right; vertical-align: top; }
-.class-table thead th { background: var(--navy-700); color: #fff; }
-.class-table tbody tr:nth-child(even) { background: var(--cyan-soft); }
-.drop-zone {
-  border: 2px dashed var(--cyan-dark); border-radius: var(--radius);
-  background: var(--cyan-soft); padding: 1.2rem; text-align: center; margin: 1rem 0;
+/* ---------- احترام تفضيل تقليل الحركة ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .btn,
+  .level-card,
+  .landing-level-card,
+  .landing-cover,
+  .landing-track-card,
+  .lesson-row,
+  .exp-led,
+  .skip-link {
+    transition: none;
+  }
+  .level-card:hover,
+  .landing-level-card:hover,
+  .landing-track-card.is-live:hover,
+  .lesson-row:hover {
+    transform: none;
+  }
+  .landing-level-card:hover .landing-cover {
+    transform: none;
+  }
 }
-.drop-zone.drag-over { background: #cdeefb; border-color: var(--navy-600); }
-.drop-zone-text { font-size: 1.05rem; margin: 0 0 .8rem; }
-.playground-card { border: 2px solid var(--amber); }
-.pg-label { display: block; margin: .8rem 0; font-weight: 600; }
-.pg-input {
-  display: block; width: 100%; margin-top: .4rem; padding: .7rem;
-  font-family: Consolas, "Courier New", monospace; font-size: 1rem; line-height: 1.6;
-  border: 1px solid var(--line); border-radius: 10px; background: #0a2242; color: #d9f4ff;
-  text-align: left;
-}
-.pg-input::placeholder { color: #7fa8c9; }
-.pool-card { border: 2px dashed var(--cyan-dark); }
-.pool-kind {
-  display: inline-block; background: var(--navy-700); color: #fff;
-  border-radius: 999px; padding: .05rem .6rem; font-size: .8rem; margin-inline-end: .3rem;
-}
-.exp-guide {
-  border: 1px solid var(--line); border-radius: var(--radius);
-  background: #fbfdff; padding: .8rem 1rem; margin-bottom: 1rem;
-}
-.para-flash { background: #fff3cd; border-radius: 8px; transition: background 1.2s ease; }
-.fb-section-link { margin-inline-start: .4rem; }
-.sync-overlay {
-  position: fixed; inset: 0; background: rgba(5, 15, 31, .55);
-  display: flex; align-items: flex-start; justify-content: center;
-  padding: 4vh 1rem; z-index: 1000; overflow-y: auto;
-}
-.sync-panel {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  max-width: 640px; width: 100%; padding: 1.4rem;
-}
-.sync-panel h2 { margin-top: 0; color: var(--navy-700); }
-.sync-auto { margin-top: 1rem; border-top: 2px solid var(--line); padding-top: .8rem; }
-.sync-auto-state { font-weight: 700; margin: 0 0 .5rem; }
-.sync-auto-toggle { display: flex; gap: .5rem; align-items: flex-start; font-weight: 400; cursor: pointer; margin: 0; }
-.sync-auto-toggle input { margin-top: .3rem; }
-
-/* ---------- صفحة الاستقبال العامة (المرحلة الثانية) ---------- */
-.landing-hero { text-align: center; padding: 2.2rem 1rem 1.4rem; }
-.landing-logo { width: 110px; height: 110px; border-radius: 24px; box-shadow: var(--shadow); }
-.landing-hero h1 { color: var(--navy-700); font-size: 1.9rem; line-height: 1.5; max-width: 820px; margin: 1.1rem auto .6rem; }
-.landing-promise { max-width: 680px; margin: 0 auto; font-size: 1.08rem; }
-.landing-ctas { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin: 1.2rem 0 .5rem; }
-.landing-ctas .btn { padding: .75rem 1.6rem; font-size: 1.05rem; }
-.landing-free { color: var(--muted); font-weight: 700; }
-.landing-browse-row { margin: .1rem 0 0; }
-.landing-browse {
-  background: none; border: none; cursor: pointer; font-family: inherit;
-  color: var(--cyan-dark); font-weight: 700; font-size: 1rem; padding: .2rem .4rem;
-}
-.landing-browse:hover { text-decoration: underline; }
-/* شريط إحصاءات الواجهة: أرقام مشتقة من البيانات وقت العرض */
-.landing-stats {
-  display: flex; justify-content: center; gap: 2.2rem; flex-wrap: wrap;
-  max-width: 760px; margin: 1.1rem auto .4rem; padding: .9rem 1rem;
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-}
-.landing-stat { display: flex; flex-direction: column; text-align: center; }
-.landing-stat-num { font-size: 1.45rem; font-weight: 800; color: var(--navy-700); line-height: 1.3; }
-.landing-stat-label { color: var(--muted); font-weight: 700; font-size: .9rem; }
-/* صف المزايا «لماذا أكاديميتنا؟» */
-.landing-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
-.landing-feature {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  border-top: 4px solid var(--cyan); padding: 1rem;
-  display: flex; flex-direction: column; align-items: center; gap: .45rem; text-align: center;
-}
-.landing-feature-icon { font-size: 1.7rem; line-height: 1; }
-.landing-feature-label { font-weight: 700; color: var(--navy-700); }
-.landing-track-note, .landing-tracks-intro { color: var(--muted); }
-/* قسم «مسارات الأكاديمية»: بطاقة حيّة واحدة (الأردوينو) وبطاقات «قريبًا»
-   ثانوية بهدوء — الهوية المحفوظة فقط: أبيض + أزرق + أزرق فاتح */
-.landing-track-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
-.landing-track-card {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  border-top: 4px solid var(--cyan); padding: 1rem 1.05rem 1.05rem;
-  display: flex; flex-direction: column; gap: .35rem;
-}
-.landing-track-card.is-live { cursor: pointer; transition: transform .15s, box-shadow .15s; }
-.landing-track-card.is-live:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(7, 24, 46, .16); }
-.landing-track-card.is-soon { border-top-color: var(--line); background: #f7fafc; box-shadow: none; }
-.landing-track-card h3 { color: var(--navy-700); margin: .1rem 0; font-size: 1.05rem; }
-.landing-track-card.is-soon h3 { color: var(--muted); }
-.landing-track-desc { margin: .2rem 0; color: var(--muted); }
-.landing-track-card.is-live .landing-track-desc { color: var(--ink); }
-.track-badge {
-  align-self: flex-start; border-radius: 999px; padding: .05rem .65rem;
-  font-size: .82rem; font-weight: 700; white-space: nowrap;
-}
-.track-badge-live { background: var(--cyan); color: var(--navy-900); }
-.track-badge-soon { background: var(--cyan-soft); color: var(--muted); }
-.landing-track-meta { margin: .2rem 0; font-weight: 800; color: var(--navy-700); }
-.landing-track-action { margin-top: auto; font-weight: 700; color: var(--cyan-dark); }
-.landing-level-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-/* بطاقة مستوى على نمط بطاقات الدورات: غلاف، وصف، ميتا، محتوى قابل للفتح، سطر المُعدّ */
-.landing-level-card {
-  background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow);
-  overflow: hidden; cursor: pointer; display: flex; flex-direction: column;
-  transition: transform .15s, box-shadow .15s;
-}
-.landing-level-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(7, 24, 46, .16); }
-.landing-cover { width: 100%; height: 150px; object-fit: cover; display: block; }
-.landing-card-body { padding: .9rem 1.05rem 1.05rem; display: flex; flex-direction: column; gap: .35rem; flex: 1; }
-.landing-level-card h3 { color: var(--navy-700); margin: .1rem 0; font-size: 1.05rem; }
-.landing-level-card p { margin: .2rem 0; }
-.landing-meta { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-.landing-count { font-weight: 800; color: var(--navy-700); }
-.landing-cert {
-  background: var(--cyan-soft); color: var(--cyan-dark); border-radius: 999px;
-  padding: .05rem .6rem; font-size: .85rem; font-weight: 700;
-}
-.landing-syllabus summary { cursor: pointer; font-weight: 700; color: var(--cyan-dark); }
-.landing-syllabus ol { margin: .3rem 0 0; padding-inline-start: 1.3rem; font-size: .92rem; line-height: 1.9; color: var(--muted); }
-.landing-provider {
-  margin-top: auto; padding-top: .55rem; border-top: 1px solid var(--line);
-  font-size: .82rem; color: var(--muted);
-}
-/* كتلة الشهادات */
-.landing-certs { display: flex; gap: 1.2rem; align-items: center; flex-wrap: wrap; }
-.landing-cert-img { width: 300px; max-width: 100%; border-radius: 12px; box-shadow: var(--shadow); }
-.landing-cert-text { flex: 1 1 300px; }
-.landing-cert-text h2 { margin-top: 0; color: var(--navy-700); }
-.steps-list { line-height: 2; margin: 0; padding-inline-start: 1.4rem; }
-.landing-outro { text-align: center; font-size: 1.15rem; font-weight: 700; padding: .6rem 0 0; }
-.landing-footer { text-align: center; color: var(--muted); border-top: 2px solid var(--line); margin-top: 1.6rem; padding-top: 1rem; }
-
-/* ---------- لوحة الأستاذ: أدوات التتبّع (المرحلة الثانية) ---------- */
-.teacher-controls { display: flex; gap: .9rem; flex-wrap: wrap; margin-bottom: 1rem; }
-.teacher-controls label { display: block; font-weight: 700; flex: 1 1 180px; }
-.teacher-controls input, .teacher-controls select {
-  display: block; width: 100%; margin-top: .3rem; padding: .55rem .8rem;
-  border: 2px solid var(--line); border-radius: 10px; font-size: 1rem; font-family: inherit; background: #fff;
-}
-.teacher-controls input:focus, .teacher-controls select:focus { outline: none; border-color: var(--cyan); }
-.provider-badge {
-  display: inline-block; background: #eaf6fd; border: 1px solid var(--line);
-  border-radius: 999px; padding: .05rem .6rem; font-size: .82rem; font-weight: 700;
-}
-.student-info th { text-align: start; width: 180px; }
