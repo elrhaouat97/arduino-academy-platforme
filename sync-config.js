@@ -6,4 +6,4 @@
    ما دام الحقل فارغًا ("") تبقى المزامنة غير مفعّلة، وتعمل المنصة
    محليًا بالكامل كالمعتاد وكأن المزامنة غير موجودة.
    ============================================================ */
-window.ACADEMY_SYNC_CONFIG = { googleClientId: "" };
+window.ACADEMY_SYNC_CONFIG = { googleClientId: "947865920541-4ssvvqdpspv5ubqcfrp4q9911tp6nonq.apps.googleusercontent.com" };
