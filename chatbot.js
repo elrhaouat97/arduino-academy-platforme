@@ -7,7 +7,7 @@
    وردّ لبق عند الخروج عن النطاق.
    التكامل: أضف chatbot.css ثم chatbot.js إلى أي صفحة، وسيُنشئ
    الزر والنافذة بنفسه. الإعداد الاختياري:
-     window.ASKBOT_CONFIG = { logoPath: 'assets/club-avatar.png' }
+     window.ASKBOT_CONFIG = { logoPath: 'assets/club-avatar.png', robotWave: 'assets/robot-wave.png', robotThink: 'assets/robot-think.png', robotWelcome: 'assets/robot-welcome.png' }
    الواجهة البرمجية: window.AskBot = { open, close, ask }
    ============================================================ */
 (function () {
@@ -709,6 +709,10 @@
 
   var CONFIG = window.ASKBOT_CONFIG || {};
   var LOGO = CONFIG.logoPath || 'assets/club-avatar.png';
+  var ROBOT_WAVE = CONFIG.robotWave || 'assets/robot-wave.png';
+  var ROBOT_THINK = CONFIG.robotThink || 'assets/robot-think.png';
+  var ROBOT_WELCOME = CONFIG.robotWelcome || 'assets/robot-welcome.png';
+  var THINK_PHRASES = ['اسألني', 'هل لديك سؤال؟', 'بماذا تفكر؟', 'هل أساعدك؟'];
   var DEFAULT_FACTS = { total: 45, levels: 5, c: [10, 11, 11, 8, 5] };
   var WELCOME = 'مرحبًا بك في أكاديمية الروبوتيك والذكاء الاصطناعي.\nأنا «اسألني»، مساعدك داخل المنصة: أجيب عن أسئلتك حول الدروس والمستويات، والتسجيل والحساب، والشهادات، والنادي.\nلا تشارك معلوماتك الشخصية هنا، واسألني ما شئت عن الأكاديمية.';
   var HOME_CHIPS = ['ما هي المسارات المتوفرة؟', 'كم عدد الدروس؟', 'هل الدورة مجانية؟', 'كيف أنشئ حسابًا؟', 'كيف أحصل على الشهادة؟', 'من هو المشرف على الأكاديمية؟'];
@@ -745,10 +749,13 @@
     root.className = 'askbot-root';
     root.setAttribute('dir', 'rtl');
     root.innerHTML =
-      '<div class="askbot-teaser" id="askbot-teaser" role="button" tabindex="0">جرّب تسألني عن الأكاديمية</div>' +
-      '<button class="askbot-fab" id="askbot-fab" type="button" aria-label="اسألني — مساعد الأكاديمية" aria-expanded="false">' +
-        avatarHTML('askbot-fab-avatar') +
-        '<span class="askbot-fab-label">اسألني</span>' +
+      '<button class="askbot-fab3d" id="askbot-fab" type="button" aria-label="اسألني — مساعد الأكاديمية" aria-expanded="false">' +
+        '<span class="askbot-think" id="askbot-think" aria-hidden="true"><span id="askbot-think-text">اسألني</span></span>' +
+        '<span class="askbot-botwrap">' +
+          '<img class="askbot-bot askbot-bot-wave" src="' + esc(ROBOT_WAVE) + '" alt="" draggable="false">' +
+          '<img class="askbot-bot askbot-bot-think" src="' + esc(ROBOT_THINK) + '" alt="" draggable="false">' +
+        '</span>' +
+        '<span class="askbot-botshadow"></span>' +
         '<span class="askbot-dot" id="askbot-dot"></span>' +
       '</button>' +
       '<section class="askbot-panel" id="askbot-panel" aria-hidden="true" aria-label="محادثة مساعد الأكاديمية">' +
@@ -767,18 +774,19 @@
         '</form>' +
       '</section>';
     document.body.appendChild(root);
+    els.root = root;
     els.fab = document.getElementById('askbot-fab');
     els.panel = document.getElementById('askbot-panel');
     els.msgs = document.getElementById('askbot-msgs');
     els.chips = document.getElementById('askbot-chips');
     els.form = document.getElementById('askbot-form');
     els.input = document.getElementById('askbot-input');
-    els.teaser = document.getElementById('askbot-teaser');
+    els.think = document.getElementById('askbot-think');
+    els.thinkText = document.getElementById('askbot-think-text');
     els.dot = document.getElementById('askbot-dot');
 
     els.fab.addEventListener('click', function () { state.open ? close() : open(); });
     document.getElementById('askbot-close').addEventListener('click', close);
-    els.teaser.addEventListener('click', open);
     els.form.addEventListener('submit', function (ev) {
       ev.preventDefault();
       var v = els.input.value.trim();
@@ -792,18 +800,54 @@
     });
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && state.open) close(); });
 
-    /* إعلان الزيارة الأولى */
+    /* نقطة التنبيه حتى أول فتح */
     var seen = false;
     try { seen = !!localStorage.getItem('askbot.teaserSeen'); } catch (e) { seen = true; }
     if (!seen) {
-      setTimeout(function () {
-        if (!state.open) els.teaser.classList.add('is-visible');
-        els.dot.classList.add('is-visible');
-      }, 1200);
+      setTimeout(function () { if (!state.open) els.dot.classList.add('is-visible'); }, 1200);
     } else {
       els.dot.style.display = 'none';
     }
+    startThinkCycle();
   }
+
+  /* ============ فقاعة التفكير فوق رأس الروبوت ============ */
+  var thinkCtl = { i: 0, showT: null, hideT: null, running: false };
+
+  function thinkShow() {
+    if (state.open || document.hidden) { thinkCtl.showT = setTimeout(thinkShow, 4000); return; }
+    var dots = (thinkCtl.i % 3 === 2);
+    els.thinkText.textContent = dots ? '…' : THINK_PHRASES[thinkCtl.i % THINK_PHRASES.length];
+    if (!dots) thinkCtl.i++;
+    els.fab.classList.add('is-thinking');
+    els.think.classList.add('is-visible');
+    thinkCtl.hideT = setTimeout(thinkHide, dots ? 1500 : 2600);
+  }
+
+  function thinkHide() {
+    els.think.classList.remove('is-visible');
+    els.fab.classList.remove('is-thinking');
+    thinkCtl.showT = setTimeout(thinkShow, 5200 + Math.random() * 1800);
+  }
+
+  function startThinkCycle() {
+    if (thinkCtl.running) return;
+    thinkCtl.running = true;
+    thinkCtl.showT = setTimeout(thinkShow, 2000);
+  }
+
+  function stopThinkCycle() {
+    thinkCtl.running = false;
+    clearTimeout(thinkCtl.showT);
+    clearTimeout(thinkCtl.hideT);
+    if (els.think) els.think.classList.remove('is-visible');
+    if (els.fab) els.fab.classList.remove('is-thinking');
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) stopThinkCycle();
+    else if (!state.open) { thinkCtl.running = false; startThinkCycle(); }
+  });
 
   function renderChips(list) {
     els.chips.innerHTML = (list || []).map(function (q) {
@@ -853,15 +897,20 @@
 
   function open() {
     state.open = true;
+    stopThinkCycle();
+    els.root.classList.add('is-open');
     els.panel.classList.add('is-open');
     els.panel.setAttribute('aria-hidden', 'false');
     els.fab.setAttribute('aria-expanded', 'true');
-    els.teaser.classList.remove('is-visible');
     els.dot.classList.remove('is-visible');
     els.dot.style.display = 'none';
     try { localStorage.setItem('askbot.teaserSeen', '1'); } catch (e) { /* خاص فقط */ }
     if (!state.welcomed) {
       state.welcomed = true;
+      var hero = document.createElement('div');
+      hero.className = 'askbot-hero';
+      hero.innerHTML = '<img src="' + esc(ROBOT_WELCOME) + '" alt="">';
+      els.msgs.appendChild(hero);
       pushBot({ text: WELCOME, action: null, chips: HOME_CHIPS });
     }
     setTimeout(function () { els.input.focus(); }, 260);
@@ -869,9 +918,12 @@
 
   function close() {
     state.open = false;
+    els.root.classList.remove('is-open');
     els.panel.classList.remove('is-open');
     els.panel.setAttribute('aria-hidden', 'true');
     els.fab.setAttribute('aria-expanded', 'false');
+    thinkCtl.running = false;
+    startThinkCycle();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
