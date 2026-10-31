@@ -16,5 +16,16 @@ window.ACADEMY_YT = {
   "L1-07": "ewzhjsWkDWA",
   "L1-08": "2MdFyn_VUKQ",
   "L1-09": "xISZKeS42Nk",
-  "L1-10": "C15YrSFJXak"
+  "L1-10": "C15YrSFJXak",
+  "L2-01": "wJtnc1oK304",
+  "L2-02": "cdeuiCwgld4",
+  "L2-03": "5LqyBgeIMeA",
+  "L2-04": "f1b6fqJYfHw",
+  "L2-05": "4xFhxHd01oo",
+  "L2-06": "aTGwVXXUwco",
+  "L2-07": "MPnMJgYJygs",
+  "L2-08": "8d5as-BWr-I",
+  "L2-09": "C7U3_YbDhjM",
+  "L2-10": "9Zs1iHyW058",
+  "L2-11": "W3EVf-Vw3d8"
 };
